@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <style>
+      * {
+        box-sizing: border-box;
+      }
+      .wrapper {
+        max-width: 940px;
+        margin: 0 auto;
+      }
+
+      .wrapper > div {
+        border: 2px solid rgb(233 171 88);
+        border-radius: 5px;
+        background-color: rgba(233 171 88 / 0.5);
+        padding: 1em;
+        color: #d9480f;
+      }
+
+      body {
+        margin: 40px;
+      }
+
+      #wrapper1 {
+        display: grid;
+        grid-template-columns: repeat(3, 200px);
+        grid-gap: 10px;
+        background-color: #fff;
+        color: #444;
+      }
+      #wrapper2 {
+        padding: 40px;
+        display: grid;
+        grid-template-columns: repeat(1, 600px);
+        grid-gap: 10px;
+        background-color: #fff;
+        color: #444;
+      }
+
+      .box {
+        background-color: #444;
+        height: 200px;
+        color: #fff;
+        border-radius: 5px;
+        padding: 20px;
+        font-size: 150%;
+      }
+    </style>
+    <title>Shift test</title>
+  </head>
+  <body>
+    <h1>Shift test page</h1>
+
+    <div id="wrapper1" class="wrapper">
+      <div id="a" class="box a">A</div>
+      <div id="b" class="box b">B</div>
+      <div id="c" class="box c">C</div>
+      <div id="d" class="box d">D</div>
+      <div id="e" class="box e">E</div>
+      <div id="f" class="box f">F</div>
+    </div>
+    <div id="wrapper2" class="wrapper">
+      <div class="box g">G</div>
+      <div id="insertDeleteItem" class="box h">H</div>
+      <a href="https://mallocs.net"><div class="box i">I</div></a>
+      <div class="box j">J</div>
+    </div>
+    <script>
+      const originalInsertDeleteEl = document
+        .getElementById("insertDeleteItem")
+        .cloneNode(true);
+
+      window.setInterval(() => {
+        const wrapper1 = document.getElementById("wrapper1");
+        [...wrapper1.children]
+          .map((item, index) => [(index + 1) % wrapper1.children.length, item])
+          .sort((a, b) => (a[0] > b[0] ? 1 : -1))
+          .forEach((item) => wrapper1.appendChild(item[1]));
+      }, 4000);
+      window.setInterval(() => {
+        const wrapper2 = document.getElementById("wrapper2");
+        const currentChildCount = wrapper2.children.length;
+        if (currentChildCount === 3) {
+          wrapper2.insertBefore(originalInsertDeleteEl, wrapper2.children[1]);
+        } else {
+          wrapper2.removeChild(wrapper2.children[1]);
+        }
+      }, 5000);
+    </script>
+  </body>
+</html>

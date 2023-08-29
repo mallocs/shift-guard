@@ -1,0 +1,22 @@
+{
+  "name": "shift-guard",
+  "version": "0.0.1",
+  "description": "Prevent accidental clicks on recently shifted content by opening a prompt asking whether to continue.",
+  "author": "Marcus Ulrich <shiftguard@mallocs.net",
+  "license": "ISC",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "copy-polyfill": "cp node_modules/webextension-polyfill/dist/browser-polyfill.js .",
+    "build:firefox:manifest": "cp manifest/manifest.firefox.json manifest.json",
+    "bundle:firefox:zip": "web-ext build -s . -a . && mv ./shift_guard-$npm_package_version.zip ./shift_guard-firefox-v$npm_package_version.xpi",
+    "build:chrome:manifest": "cp manifest/manifest.chrome.json manifest.json"
+
+  },
+  "devDependencies": {
+    "crx": "^5.0.1",
+    "npm-run-all": "^4.1.5",
+    "web-ext": "^7.6.2",
+    "webextension-polyfill": "^0.10.0"
+  }
+}
