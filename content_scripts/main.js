@@ -1,22 +1,29 @@
-const mutationLog = [];
-const shiftLog = [];
-const defaultDelay = 200;
+let mutationLog = [];
+let shiftLog = [];
 
 let delay = defaultDelay;
 browser.storage.local.get(appStorageDelayKey).then((res) => {
-  delay = res.delay;
+  delay = res.delay || defaultDelay;
 });
 
 // mutates input log
 // log entry should be [Date, logEntry]
 function pruneLog(log) {
   const time = Date.now();
-  while (log.length > 0 && log[0][0] + delay <= time) {
-    log.shift();
+  let left = 0,
+    right = log.length;
+  while (left < right) {
+    const middle = left + Math.floor((right - left) / 2);
+    if (log[middle][0] + delay <= time) {
+      left = middle + 1;
+    } else {
+      right = middle;
+    }
   }
+  return log.slice(left);
 }
 const performanceObserver = new PerformanceObserver((list) => {
-  pruneLog(shiftLog);
+  shiftLog = pruneLog(shiftLog);
   list.getEntries().forEach((entry) => {
     entry.sources.forEach((source) => {
       shiftLog.push([Date.now(), source]);
@@ -60,7 +67,7 @@ function setupClassSets() {
 }
 
 const mutationObserver = new MutationObserver((mutationList) => {
-  pruneLog(mutationLog);
+  mutationLog = pruneLog(mutationLog);
 
   for (const mutation of mutationList) {
     if (!watchSelectors) {
@@ -118,7 +125,7 @@ function stopClickEvent(e) {
 }
 
 const clickHandlerFn = (e) => {
-  pruneLog(mutationLog);
+  mutationLog = pruneLog(mutationLog);
   for (const [logTime, logEntry] of mutationLog) {
     if (logEntry.type === "childList" && logEntry.addedNodes.length) {
       logEntry.addedNodes.forEach((node) => {
@@ -138,7 +145,7 @@ const clickHandlerFn = (e) => {
     }
   }
 
-  pruneLog(shiftLog);
+  shiftLog = pruneLog(shiftLog);
   for (const [logTime, logEntry] of shiftLog) {
     if (
       logEntry.node &&
@@ -160,14 +167,12 @@ function start() {
     subtree: true,
   });
   document.body.addEventListener("click", clickHandlerFn, true);
-  console.log("started");
 }
 
 function stop() {
   performanceObserver.disconnect();
   mutationObserver.disconnect();
   document.body.removeEventListener("click", clickHandlerFn, true);
-  console.log("stopped");
 }
 
 browser.storage.local.get(appStorageStatusKey).then((res) => {

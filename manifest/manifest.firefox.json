@@ -1,5 +1,5 @@
 {
-  "manifest_version": 3,
+  "manifest_version": 2,
   "name": "Shift Guard",
   "description": "Prevent accidental clicks on recently shifted content by opening a prompt asking whether to continue.",
   "version": "0.0.1",
@@ -20,7 +20,7 @@
       ]
     }
   ],
-  "action": {
+  "browser_action": {
     "default_icon": {
       "64": "icons/icon-64.png"
     },
@@ -32,18 +32,17 @@
     "browser_style": false
   },
   "background": {
-    "scripts": ["lib/browser-polyfill.js", "lib/shared.js", "background/background.js"]
+    "scripts": [ "/background/background.js" ],
+    "type": "module"
   },
   "permissions": [
+    "<all_urls>",
     "management",
     "storage"
   ],
-  "host_permissions": [
-    "<all_urls>"
-  ],
   "browser_specific_settings": {
     "gecko": {
-      "id": "{3aad82ed-58b9-44c8-9057-b265ded8c9f2}"
+      "id": "{3aad82ed-58b9-44c8-9057-b265ded8c9f3}"
     }
   }
   

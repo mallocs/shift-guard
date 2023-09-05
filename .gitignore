@@ -11,3 +11,5 @@ lerna-debug.log*
 .eslintcache
 *.tsbuildinfo
 .env*.local
+web-ext-artifacts
+.web-extension-id
