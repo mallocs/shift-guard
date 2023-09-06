@@ -118,19 +118,30 @@ function isEventInRect(event, rect) {
   );
 }
 
-function stopClickEvent(e) {
+function stopEvent(e) {
   e.preventDefault();
   e.stopPropagation();
   e.stopImmediatePropagation();
+  window.addEventListener("click", captureClick, true);
+}
+function captureClick(e) {
+  e.preventDefault();
+  e.stopPropagation();
+  e.stopImmediatePropagation();
+  window.removeEventListener("click", captureClick, true);
 }
 
-const clickHandlerFn = (e) => {
+const mousedownHandlerFn = (e) => {
+  // mutations sometimes happen in response to mousedown events but those are
+  // triggered by the user and shouldn't be stopped, so we have to check
+  // mutations when mousedown events happen and use that to cancel click events
+
   mutationLog = pruneLog(mutationLog);
   for (const [logTime, logEntry] of mutationLog) {
     if (logEntry.type === "childList" && logEntry.addedNodes.length) {
       logEntry.addedNodes.forEach((node) => {
         if (node.contains(e.target)) {
-          stopClickEvent(e);
+          stopEvent(e);
           return;
         }
       });
@@ -140,7 +151,7 @@ const clickHandlerFn = (e) => {
         logEntry.target.attributes.getNamedItem(logEntry.attributeName).value &&
       logEntry.target.contains(e.target)
     ) {
-      stopClickEvent(e);
+      stopEvent(e);
       return;
     }
   }
@@ -151,7 +162,7 @@ const clickHandlerFn = (e) => {
       logEntry.node &&
       isEventInRect(e, logEntry.node.getBoundingClientRect())
     ) {
-      stopClickEvent(e);
+      stopEvent(e);
       return;
     }
   }
@@ -166,13 +177,13 @@ function start() {
     childList: true,
     subtree: true,
   });
-  document.body.addEventListener("click", clickHandlerFn, true);
+  document.addEventListener("mousedown", mousedownHandlerFn, true);
 }
 
 function stop() {
   performanceObserver.disconnect();
   mutationObserver.disconnect();
-  document.body.removeEventListener("click", clickHandlerFn, true);
+  document.removeEventListener("mousedown", mousedownHandlerFn, true);
 }
 
 browser.storage.local.get(appStorageStatusKey).then((res) => {
