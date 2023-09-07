@@ -10,8 +10,11 @@
     "copy-polyfill": "cp node_modules/webextension-polyfill/dist/browser-polyfill.js .",
     "build:firefox:manifest": "cp manifest/manifest.firefox.json manifest.json",
     "bundle:firefox:zip": "web-ext build -s . -a . && mv ./shift_guard-$npm_package_version.zip ./shift_guard-firefox-v$npm_package_version.xpi",
-    "build:chrome:manifest": "cp manifest/manifest.chrome.json manifest.json"
-
+    "bundle:firefox:sign-unlisted": "source .env && web-ext sign --channel=unlisted --api-key=$WEB_EXT_API_KEY --api-secret=$WEB_EXT_API_SECRET",
+    "//": "submitting to listed channel is currently buggy: https://extensionworkshop.com/documentation/develop/getting-started-with-web-ext/#signing-test-version-listed",
+    "bundle:firefox:sign": "source .env && web-ext sign --channel=listed --api-key=$WEB_EXT_API_KEY --api-secret=$WEB_EXT_API_SECRET",
+    "build:chrome:manifest": "cp manifest/manifest.chrome.json manifest.json",
+    "build:chrome": "run-s build:chrome:*"
   },
   "devDependencies": {
     "crx": "^5.0.1",
