@@ -7,18 +7,26 @@
   "type": "module",
   "private": true,
   "scripts": {
-    "copy-polyfill": "cp node_modules/webextension-polyfill/dist/browser-polyfill.js .",
-    "build:firefox:manifest": "cp manifest/manifest.firefox.json manifest.json",
-    "bundle:firefox:zip": "web-ext build -s . -a . && mv ./shift_guard-$npm_package_version.zip ./shift_guard-firefox-v$npm_package_version.xpi",
+    "clean": "rimraf dist ./*.xpi",
+    "build:firefox": "run-s clean build:vite:* build:firefox:*",
+    "build:firefox:manifest": "cp src/manifest/manifest.firefox.json ./dist/manifest.json",
+    "build:firefox:zip": "web-ext build -s dist -a dist && mv ./dist/shift_guard-$npm_package_version.zip ./dist/shift_guard-firefox-v$npm_package_version.xpi",
+    "build:vite:common": "vite build",
+    "build:vite:content": "vite build --config vite.content.config.js",
     "bundle:firefox:sign-unlisted": "source .env && web-ext sign --channel=unlisted --api-key=$WEB_EXT_API_KEY --api-secret=$WEB_EXT_API_SECRET",
     "//": "submitting to listed channel is currently buggy: https://extensionworkshop.com/documentation/develop/getting-started-with-web-ext/#signing-test-version-listed",
     "bundle:firefox:sign": "source .env && web-ext sign --channel=listed --api-key=$WEB_EXT_API_KEY --api-secret=$WEB_EXT_API_SECRET",
-    "build:chrome:manifest": "cp manifest/manifest.chrome.json manifest.json",
-    "build:chrome": "run-s build:chrome:*"
+    "build:chrome:manifest": "cp src/manifest/manifest.chrome.json ./dist/manifest.json",
+    "build:chrome": "run-s clean build:vite:* build:chrome:*",
+    "version:update": "npx replace ' \"version\": \"(\\d+).(\\d+).(\\d+)\"' \" \\\"version\\\": \\\"$npm_package_version\\\"\" ./manifest/*.json",
+    "//build:vite:js": "vite build --config vite.config.content.js",
+    "//build:chrome:script": "vite build --config vite.chrome.config.js"
   },
   "devDependencies": {
     "crx": "^5.0.1",
     "npm-run-all": "^4.1.5",
+    "rimraf": "^5.0.1",
+    "vite": "^4.4.9",
     "web-ext": "^7.6.2",
     "webextension-polyfill": "^0.10.0"
   }

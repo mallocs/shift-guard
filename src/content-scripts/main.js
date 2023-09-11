@@ -1,3 +1,11 @@
+import browser from "webextension-polyfill";
+import {
+  appStatusStopped,
+  appStorageStatusKey,
+  appStorageDelayKey,
+  defaultDelay,
+} from "../lib/shared.js";
+
 let mutationLog = [];
 let shiftLog = [];
 

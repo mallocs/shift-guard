@@ -1,5 +1,10 @@
-import "../lib/browser-polyfill.js";
-import "../lib/shared.js";
+import browser from "webextension-polyfill";
+import {
+  stopApp,
+  startApp,
+  appStatusStopped,
+  appStorageStatusKey,
+} from "../lib/shared.js";
 
 browser.storage.onChanged.addListener((changes, namespace) => {
   if (namespace !== "local") {

@@ -1,3 +1,6 @@
+import browser from "webextension-polyfill";
+import { stopApp, startApp, isRunning, getStoredDelay } from "../lib/shared.js";
+
 const onOffButtonEl = document.querySelector("#onOffButton");
 const delaySliderValue = document.querySelector("#delayValue");
 const delayInputEl = document.querySelector("#delayInput");

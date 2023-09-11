@@ -14,9 +14,7 @@
         "<all_urls>"
       ],
       "js": [
-        "lib/browser-polyfill.js",
-        "lib/shared.js",
-        "content_scripts/main.js"
+        "content-scripts/main.js"
       ]
     }
   ],
@@ -32,7 +30,7 @@
     "browser_style": false
   },
   "background": {
-    "scripts": [ "/background/background.js" ],
+    "scripts": [ "/background/main.js" ],
     "type": "module"
   },
   "permissions": [

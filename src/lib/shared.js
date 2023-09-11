@@ -1,3 +1,5 @@
+import browser from "webextension-polyfill";
+
 if (typeof browser.action === "undefined") {
   browser.action = browser.browserAction;
 }
@@ -27,12 +29,9 @@ async function getStoredDelay() {
   return storedDelay.delay || defaultDelay;
 }
 
-globalThis.defaultDelay = 600;
-globalThis.stopApp = stopApp;
-globalThis.startApp = startApp;
-globalThis.isRunning = isRunning;
-globalThis.getStoredDelay = getStoredDelay;
-globalThis.appStatusStopped = "stopped";
-globalThis.appStatusRunning = "";
-globalThis.appStorageDelayKey = "delay";
-globalThis.appStorageStatusKey = "status";
+export const defaultDelay = 600;
+export const appStatusStopped = "stopped";
+export const appStatusRunning = "";
+export const appStorageDelayKey = "delay";
+export const appStorageStatusKey = "status";
+export { stopApp, startApp, isRunning, getStoredDelay };
