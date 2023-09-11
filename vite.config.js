@@ -9,8 +9,8 @@ export default defineConfig({
     minify: false,
     rollupOptions: {
       input: {
-        popup: path.resolve(__dirname, "src", "popup/index.html"),
-        background: path.resolve(__dirname, "src", "background/main.js"),
+        popup: new URL("./src/popup/index.html", import.meta.url).pathname,
+        background: path.resolve(__dirname, "src", "background/main.ts"),
       },
       output: {
         entryFileNames: "[name]/main.js",

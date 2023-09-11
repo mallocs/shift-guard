@@ -1,20 +1,23 @@
 import browser from "webextension-polyfill";
 import { stopApp, startApp, isRunning, getStoredDelay } from "../lib/shared.js";
 
-const onOffButtonEl = document.querySelector("#onOffButton");
-const delaySliderValue = document.querySelector("#delayValue");
-const delayInputEl = document.querySelector("#delayInput");
+const onOffButtonEl = document.querySelector("#onOffButton")!;
+const delaySliderValue = document.querySelector(
+  "#delayValue"
+)! as HTMLInputElement;
+const delayInputEl = document.querySelector("#delayInput")! as HTMLInputElement;
 
-function renderSlider(value) {
-  const progress = (value / delayInputEl.max) * 100;
+function renderSlider(value: number) {
+  const progress = (value / Number(delayInputEl.max)) * 100;
   delayInputEl.style.background = `linear-gradient(to right, rgb(26, 115, 232) ${progress}%, #ccc ${progress}%)`;
   delaySliderValue.innerText = (Math.round(value / 100) / 10).toFixed(1) + "s";
 }
 
 delayInputEl.addEventListener("input", (event) => {
-  renderSlider(event.target.value);
+  const inputValue = Number((event.target as HTMLInputElement).value);
+  renderSlider(inputValue);
   browser.storage.local.set({
-    delay: parseInt(event.target.value),
+    delay: inputValue,
   });
 });
 

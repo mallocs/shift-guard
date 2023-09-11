@@ -8,24 +8,25 @@
   "private": true,
   "scripts": {
     "clean": "rimraf dist ./*.xpi",
-    "build:firefox": "run-s clean build:vite:* build:firefox:*",
+    "build:firefox": "run-s clean build:common:* build:firefox:*",
     "build:firefox:manifest": "cp src/manifest/manifest.firefox.json ./dist/manifest.json",
     "build:firefox:zip": "web-ext build -s dist -a dist && mv ./dist/shift_guard-$npm_package_version.zip ./dist/shift_guard-firefox-v$npm_package_version.xpi",
-    "build:vite:common": "vite build",
-    "build:vite:content": "vite build --config vite.content.config.js",
+    "build:common:typescript": "tsc",
+    "build:common:vite": "vite build",
+    "build:common:vite:content": "vite build --config vite.content.config.js",
     "bundle:firefox:sign-unlisted": "source .env && web-ext sign --channel=unlisted --api-key=$WEB_EXT_API_KEY --api-secret=$WEB_EXT_API_SECRET",
     "//": "submitting to listed channel is currently buggy: https://extensionworkshop.com/documentation/develop/getting-started-with-web-ext/#signing-test-version-listed",
     "bundle:firefox:sign": "source .env && web-ext sign --channel=listed --api-key=$WEB_EXT_API_KEY --api-secret=$WEB_EXT_API_SECRET",
     "build:chrome:manifest": "cp src/manifest/manifest.chrome.json ./dist/manifest.json",
-    "build:chrome": "run-s clean build:vite:* build:chrome:*",
-    "version:update": "npx replace ' \"version\": \"(\\d+).(\\d+).(\\d+)\"' \" \\\"version\\\": \\\"$npm_package_version\\\"\" ./manifest/*.json",
-    "//build:vite:js": "vite build --config vite.config.content.js",
-    "//build:chrome:script": "vite build --config vite.chrome.config.js"
+    "build:chrome": "run-s clean build:common:* build:chrome:*",
+    "version:update": "npx replace ' \"version\": \"(\\d+).(\\d+).(\\d+)\"' \" \\\"version\\\": \\\"$npm_package_version\\\"\" ./manifest/*.json"
   },
   "devDependencies": {
+    "@types/webextension-polyfill": "^0.10.2",
     "crx": "^5.0.1",
     "npm-run-all": "^4.1.5",
     "rimraf": "^5.0.1",
+    "typescript": "^5.2.2",
     "vite": "^4.4.9",
     "web-ext": "^7.6.2",
     "webextension-polyfill": "^0.10.0"

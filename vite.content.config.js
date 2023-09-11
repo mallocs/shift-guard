@@ -9,13 +9,12 @@ export default defineConfig({
     minify: false,
     lib: {
       formats: ["iife"],
-      entry: path.resolve(__dirname, "src/content-scripts/main.js"),
+      entry: path.resolve(__dirname, "src/content-scripts/main.ts"),
       name: "shiftguard",
     },
     rollupOptions: {
       output: {
-        entryFileNames: "content-scripts/main.js",
-        // extend: true,
+        entryFileNames: "content-scripts/main.ts",
       },
     },
   },

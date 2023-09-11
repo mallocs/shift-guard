@@ -1,22 +1,24 @@
 import browser from "webextension-polyfill";
 
-if (typeof browser.action === "undefined") {
-  browser.action = browser.browserAction;
-}
+const browserAction =
+  typeof browser.action === "undefined"
+    ? browser.browserAction
+    : browser.action;
+
 function startApp() {
   browser.storage.local.set({
     status: appStatusRunning,
   });
-  browser.action.setBadgeText({ text: "ON" });
-  browser.action.setBadgeBackgroundColor({ color: "#008000" });
+  browserAction.setBadgeText({ text: "ON" });
+  browserAction.setBadgeBackgroundColor({ color: "#008000" });
 }
 
 function stopApp() {
   browser.storage.local.set({
     status: appStatusStopped,
   });
-  browser.action.setBadgeText({ text: "OFF" });
-  browser.action.setBadgeBackgroundColor({ color: "#FF0000" });
+  browserAction.setBadgeText({ text: "OFF" });
+  browserAction.setBadgeBackgroundColor({ color: "#FF0000" });
 }
 
 async function isRunning() {

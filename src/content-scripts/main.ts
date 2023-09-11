@@ -6,8 +6,11 @@ import {
   defaultDelay,
 } from "../lib/shared.js";
 
-let mutationLog = [];
-let shiftLog = [];
+// TODO: LayoutShift type
+type LayoutShift = { sources: LayoutShiftAttribution[] };
+type LayoutShiftAttribution = { node: HTMLElement; sources: Node[] };
+let mutationLog: [number, MutationRecord][] = [];
+let shiftLog: [number, LayoutShiftAttribution][] = [];
 
 let delay = defaultDelay;
 browser.storage.local.get(appStorageDelayKey).then((res) => {
@@ -16,7 +19,7 @@ browser.storage.local.get(appStorageDelayKey).then((res) => {
 
 // mutates input log
 // log entry should be [Date, logEntry]
-function pruneLog(log) {
+function pruneLog(log: [number, any][]) {
   const time = Date.now();
   let left = 0,
     right = log.length;
@@ -33,13 +36,14 @@ function pruneLog(log) {
 const performanceObserver = new PerformanceObserver((list) => {
   shiftLog = pruneLog(shiftLog);
   list.getEntries().forEach((entry) => {
-    entry.sources.forEach((source) => {
-      shiftLog.push([Date.now(), source]);
-    });
+    entry.entryType === "layout-shift" &&
+      (entry as unknown as LayoutShift).sources.forEach((source) => {
+        shiftLog.push([Date.now(), source]);
+      });
   });
 });
 
-let watchSelectors;
+let watchSelectors: Set<string>;
 function setupClassSets() {
   watchSelectors = new Set();
 
@@ -47,7 +51,7 @@ function setupClassSets() {
     try {
       const cssRules = styleSheet.cssRules;
       for (const rule of cssRules) {
-        if (!rule.selectorText) {
+        if (!(rule instanceof CSSStyleRule)) {
           continue;
         }
         if (
@@ -84,8 +88,9 @@ const mutationObserver = new MutationObserver((mutationList) => {
     if (mutation.type === "childList") {
       mutationLog.push([Date.now(), mutation]);
     } else if (mutation.type === "attributes") {
+      const mutationTarget = mutation.target as HTMLElement;
       if (mutation.attributeName === "style") {
-        const style = mutation.target.style;
+        const style = mutationTarget.style;
         if (
           style.display === "block" ||
           style.display === "inline-block" ||
@@ -96,17 +101,18 @@ const mutationObserver = new MutationObserver((mutationList) => {
       } else if (
         (mutation.attributeName === "class" &&
           mutation.oldValue !==
-            mutation.target.attributes.getNamedItem("class").value) ||
+            mutationTarget.attributes.getNamedItem("class")?.value) ||
         (mutation.attributeName === "id" &&
           mutation.oldValue !==
-            mutation.target.attributes.getNamedItem("id").value)
+            mutationTarget.attributes.getNamedItem("id")?.value)
       ) {
+        const mutationTarget = mutation.target as HTMLElement;
         // TODO: only matches when mutation target exactly matches the rule selectorText
         // Should match the difference of old -> current and use that to check if
         // any future clicked element completes the selector.
         for (const selectorText of watchSelectors) {
           if (
-            mutation.target.matches(selectorText) ||
+            mutationTarget.matches(selectorText) ||
             "." + mutation.oldValue === selectorText
           ) {
             mutationLog.push([Date.now(), mutation]);
@@ -117,7 +123,7 @@ const mutationObserver = new MutationObserver((mutationList) => {
   }
 });
 
-function isEventInRect(event, rect) {
+function isEventInRect(event: MouseEvent, rect: DOMRect) {
   return (
     event.clientX >= rect.left &&
     event.clientX <= rect.right &&
@@ -126,20 +132,20 @@ function isEventInRect(event, rect) {
   );
 }
 
-function stopEvent(e) {
+function stopEvent(e: MouseEvent) {
   e.preventDefault();
   e.stopPropagation();
   e.stopImmediatePropagation();
   window.addEventListener("click", captureClick, true);
 }
-function captureClick(e) {
+function captureClick(e: MouseEvent) {
   e.preventDefault();
   e.stopPropagation();
   e.stopImmediatePropagation();
   window.removeEventListener("click", captureClick, true);
 }
 
-const mousedownHandlerFn = (e) => {
+const mousedownHandlerFn = (e: MouseEvent) => {
   // mutations sometimes happen in response to mousedown events but those are
   // triggered by the user and shouldn't be stopped, so we have to check
   // mutations when mousedown events happen and use that to cancel click events
@@ -148,15 +154,19 @@ const mousedownHandlerFn = (e) => {
   for (const [logTime, logEntry] of mutationLog) {
     if (logEntry.type === "childList" && logEntry.addedNodes.length) {
       logEntry.addedNodes.forEach((node) => {
-        if (node.contains(e.target)) {
+        if (e.target instanceof HTMLElement && node.contains(e.target)) {
           stopEvent(e);
           return;
         }
       });
     } else if (
       logEntry.type === "attributes" &&
+      logEntry.attributeName &&
+      logEntry.target instanceof HTMLElement &&
       logEntry.oldValue !==
-        logEntry.target.attributes.getNamedItem(logEntry.attributeName).value &&
+        logEntry.target.attributes.getNamedItem(logEntry.attributeName)
+          ?.value &&
+      e.target instanceof HTMLElement &&
       logEntry.target.contains(e.target)
     ) {
       stopEvent(e);
