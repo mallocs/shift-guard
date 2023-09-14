@@ -50,9 +50,9 @@
   </head>
   <body>
     <h1>className and id change test page</h1>
-    <label for="changeSelect">Select a type of change:</label>
+    <label for="changeSelectEl">Select a type of change:</label>
 
-    <select name="changeSelect" id="changeSelectEl">
+    <select name="changeSelectEl" id="changeSelectEl">
       <option selected value="className,display-none,">
         class "display-none"
       </option>
@@ -62,34 +62,43 @@
       <option value="id,display-none,">id "display-none"</option>
       <option value="id,visiblility-hidden,">id "visiblility-hidden"</option>
     </select>
+    <input
+      type="number"
+      id="intervalSpeedEl"
+      name="intervalSpeedEl"
+      value="4000"
+      min="100"
+      max="10000"
+    />
     <div id="wrapper1" class="wrapper">
-      <div id="changeEl">
-        <div
-          onclick="location.href='https://mallocs.net';"
-          class="box"
-          style="cursor: pointer"
-        >
+      <div data-testid="changeEl" onclick="location.href='https://google.com';">
+        <div id="changeElChild" class="box" style="cursor: pointer">
           Change element
         </div>
       </div>
       <div id="shiftBox" class="box">Shift box</div>
-
-      <script>
-        const changeSelectEl = document.getElementById("changeSelectEl");
-        const changeEl = document.getElementById("changeEl");
-        let [attribute, onValue, offValue] = changeSelectEl.value.split(",");
-        changeEl[attribute] = onValue;
-        changeSelectEl.onchange = (e) => {
-          changeEl[attribute] = "";
-          [attribute, onValue, offValue] = e.target.value.split(",");
-          changeEl[attribute] = onValue;
-        };
-
-        window.setInterval(() => {
-          changeEl[attribute] =
-            changeEl[attribute] === onValue ? offValue : onValue;
-        }, 4000);
-      </script>
     </div>
+    <script>
+      let intervalSpeed = 4000;
+      document.getElementById("intervalSpeedEl").onchange = (e) => {
+        intervalSpeed = Number(e.target.value);
+      };
+      const changeSelectEl = document.getElementById("changeSelectEl");
+      const changeEl = document.getElementById("changeElChild").parentElement;
+      let [attribute, onValue, offValue] = changeSelectEl.value.split(",");
+      changeEl[attribute] = onValue;
+      changeSelectEl.onchange = (e) => {
+        changeEl[attribute] = "";
+        [attribute, onValue, offValue] = e.target.value.split(",");
+        changeEl[attribute] = onValue;
+      };
+
+      const changeFn = () => {
+        changeEl[attribute] =
+          changeEl[attribute] === onValue ? offValue : onValue;
+        window.setTimeout(changeFn, intervalSpeed);
+      };
+      window.setTimeout(changeFn, intervalSpeed);
+    </script>
   </body>
 </html>

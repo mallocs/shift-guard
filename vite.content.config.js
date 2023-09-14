@@ -14,7 +14,7 @@ export default defineConfig({
     },
     rollupOptions: {
       output: {
-        entryFileNames: "content-scripts/main.ts",
+        entryFileNames: "content-scripts/main.js",
       },
     },
   },

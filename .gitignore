@@ -3,6 +3,10 @@ node_modules/
 logs
 dist
 *.log
+*.pem
+*.xpi
+*.zip
+*.crx
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
