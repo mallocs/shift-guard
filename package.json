@@ -21,7 +21,7 @@
     "bundle:chrome": "run-s bundle:chrome:*",
     "bundle:chrome:build": "run-s build:chrome",
     "bundle:chrome:zip": "zip -r ./shift_guard-chrome-v$npm_package_version.zip ./dist",
-    "bundle:chrome:crx": "crx pack ./dist -o ./shift_guard-chrome-v$npm_package_version.crx",
+    "bundle:chrome:crx": "crx pack ./dist -o ./shift_guard-chrome-v$npm_package_version.crx && rm ./shift_guard-chrome-v$npm_package_version.zip",
     "compile": "run-s compile:*",
     "compile:tsc": "tsc",
     "compile:vite": "run-p compile:vite:*",
@@ -31,7 +31,8 @@
     "//": "submitting to listed channel is currently buggy: https://extensionworkshop.com/documentation/develop/getting-started-with-web-ext/#signing-test-version-listed",
     "sign:firefox": "source .env && web-ext sign --channel=listed --api-key=$WEB_EXT_API_KEY --api-secret=$WEB_EXT_API_SECRET",
     "version:update": "npx replace ' \"version\": \"(\\d+).(\\d+).(\\d+)\"' \" \\\"version\\\": \\\"$npm_package_version\\\"\" ./manifest/*.json",
-    "test:e2e": "wdio run ./wdio.e2e.conf.ts"
+    "test:e2e": "wdio run ./wdio.e2e.conf.ts",
+    "zip": "zip -r shift_guard.zip src dist test *.json *.ts -x *.DS_Store"
   },
   "devDependencies": {
     "@types/webextension-polyfill": "^0.10.2",
