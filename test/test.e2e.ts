@@ -23,25 +23,29 @@ describe("Web Extension e2e test", () => {
     const intervalSpeedEl = await $("#intervalSpeedEl");
     const changeSelectEl = await $("#changeSelectEl");
     await intervalSpeedEl.setValue("500");
+    await browser.pause(defaultPageChangeInterval);
     await changeSelectEl.selectByAttribute("value", "className,display-none,");
-    await changeEl.waitForClickable({
-      timeout: defaultPageChangeInterval + 1000,
+    await changeEl.waitForDisplayed({
+      timeout: 2000,
     });
     await changeEl.click();
+    await expect(browser).toHaveUrl(`${baseUrl}classOrIdChanges.html`);
     await changeSelectEl.selectByAttribute(
       "value",
       "className,visiblility-hidden,"
     );
     await browser.pause(200);
-    await changeEl.waitForClickable({ timeout: 2000 });
+    await changeEl.waitForDisplayed({ timeout: 2000 });
     await changeEl.click();
+    await expect(browser).toHaveUrl(`${baseUrl}classOrIdChanges.html`);
     await changeSelectEl.selectByAttribute("value", "id,display-none,");
     await browser.pause(200);
-    await changeEl.waitForClickable({ timeout: 2000 });
+    await changeEl.waitForDisplayed({ timeout: 2000 });
     await changeEl.click();
+    await expect(browser).toHaveUrl(`${baseUrl}classOrIdChanges.html`);
     await changeSelectEl.selectByAttribute("value", "id,visiblility-hidden,");
     await browser.pause(200);
-    await changeEl.waitForClickable({ timeout: 2000 });
+    await changeEl.waitForDisplayed({ timeout: 2000 });
     await changeEl.click();
     await expect(browser).toHaveUrl(`${baseUrl}classOrIdChanges.html`);
   });
@@ -62,14 +66,11 @@ describe("Shifted elements should be clickable after extension default time has 
       "value",
       "className,visiblility-hidden,"
     );
-    await changeEl.waitForClickable({
+    await changeEl.waitForDisplayed({
       timeout: defaultPageChangeInterval + 1000,
     });
     await browser.pause(defaultExtensionInterval + 100);
     await changeEl.click();
-    await browser.waitUntil(async function () {
-      return (await browser.getUrl()) !== `${baseUrl}classOrIdChanges.html`;
-    });
     await expect(browser).not.toHaveUrl(`${baseUrl}classOrIdChanges.html`);
   });
 
@@ -82,14 +83,11 @@ describe("Shifted elements should be clickable after extension default time has 
     await expect(browser).toHaveUrl(`${baseUrl}classOrIdChanges.html`);
     await intervalSpeedEl.setValue("10000");
     await changeSelectEl.selectByAttribute("value", "className,display-none,");
-    await changeEl.waitForClickable({
+    await changeEl.waitForDisplayed({
       timeout: defaultPageChangeInterval + 1000,
     });
     await browser.pause(defaultExtensionInterval + 100);
     await changeEl.click();
-    await browser.waitUntil(async function () {
-      return (await browser.getUrl()) !== `${baseUrl}classOrIdChanges.html`;
-    });
     await expect(browser).not.toHaveUrl(`${baseUrl}classOrIdChanges.html`);
   });
 
@@ -102,14 +100,11 @@ describe("Shifted elements should be clickable after extension default time has 
     await expect(browser).toHaveUrl(`${baseUrl}classOrIdChanges.html`);
     await intervalSpeedEl.setValue("10000");
     await changeSelectEl.selectByAttribute("value", "id,visiblility-hidden,");
-    await changeEl.waitForClickable({
+    await changeEl.waitForDisplayed({
       timeout: defaultPageChangeInterval + 1000,
     });
     await browser.pause(defaultExtensionInterval + 100);
     await changeEl.click();
-    await browser.waitUntil(async function () {
-      return (await browser.getUrl()) !== `${baseUrl}classOrIdChanges.html`;
-    });
     await expect(browser).not.toHaveUrl(`${baseUrl}classOrIdChanges.html`);
   });
 
@@ -122,14 +117,11 @@ describe("Shifted elements should be clickable after extension default time has 
     await expect(browser).toHaveUrl(`${baseUrl}classOrIdChanges.html`);
     await intervalSpeedEl.setValue("10000");
     await changeSelectEl.selectByAttribute("value", "id,display-none,");
-    await changeEl.waitForClickable({
+    await changeEl.waitForDisplayed({
       timeout: defaultPageChangeInterval + 1000,
     });
     await browser.pause(defaultExtensionInterval + 100);
     await changeEl.click();
-    await browser.waitUntil(async function () {
-      return (await browser.getUrl()) !== `${baseUrl}classOrIdChanges.html`;
-    });
     await expect(browser).not.toHaveUrl(`${baseUrl}classOrIdChanges.html`);
   });
 });
