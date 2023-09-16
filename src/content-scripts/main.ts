@@ -33,8 +33,35 @@ function pruneLog(log: [number, any][]) {
   }
   return log.slice(left);
 }
-const performanceObserver = new PerformanceObserver((list) => {
+
+function pruneShiftLog() {
   shiftLog = pruneLog(shiftLog);
+}
+const throttledPruneShiftLog = throttle(pruneShiftLog, 500);
+
+function pruneMutationLog() {
+  mutationLog = pruneLog(mutationLog);
+}
+const throttledPruneMutationLog = throttle(pruneMutationLog, 500);
+
+function throttle(callback: (args: any) => any, limit: number) {
+  var waiting = false; // Initially, we're not waiting
+  return function (args?: any) {
+    // We return a throttled function
+    if (!waiting) {
+      // If we're not waiting
+      callback(args); // Execute users function
+      waiting = true; // Prevent future invocations
+      setTimeout(function () {
+        // After a period of time
+        waiting = false; // And allow future invocations
+      }, limit);
+    }
+  };
+}
+
+const performanceObserver = new PerformanceObserver((list) => {
+  throttledPruneShiftLog();
   list.getEntries().forEach((entry) => {
     entry.entryType === "layout-shift" &&
       (entry as unknown as LayoutShift).sources.forEach((source) => {
@@ -79,8 +106,7 @@ function setupClassSets() {
 }
 
 const mutationObserver = new MutationObserver((mutationList) => {
-  mutationLog = pruneLog(mutationLog);
-
+  throttledPruneMutationLog();
   for (const mutation of mutationList) {
     if (!watchSelectors) {
       setupClassSets();
@@ -150,7 +176,7 @@ const mousedownHandlerFn = (e: MouseEvent) => {
   // triggered by the user and shouldn't be stopped, so we have to check
   // mutations when mousedown events happen and use that to cancel click events
 
-  mutationLog = pruneLog(mutationLog);
+  pruneMutationLog();
   for (const [logTime, logEntry] of mutationLog) {
     if (logEntry.type === "childList" && logEntry.addedNodes.length) {
       logEntry.addedNodes.forEach((node) => {
@@ -174,7 +200,7 @@ const mousedownHandlerFn = (e: MouseEvent) => {
     }
   }
 
-  shiftLog = pruneLog(shiftLog);
+  pruneShiftLog();
   for (const [logTime, logEntry] of shiftLog) {
     if (
       logEntry.node &&
