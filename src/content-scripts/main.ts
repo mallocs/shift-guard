@@ -70,9 +70,11 @@ const performanceObserver = new PerformanceObserver((list) => {
   });
 });
 
-let watchSelectors: Set<string>;
+let hideSelectors: Set<string>;
+// let showSelectors: Set<string>;
 function setupClassSets() {
-  watchSelectors = new Set();
+  hideSelectors = new Set();
+  // showSelectors = new Set();
 
   for (const styleSheet of document.styleSheets) {
     try {
@@ -85,17 +87,21 @@ function setupClassSets() {
           rule.selectorText.startsWith(".") ||
           rule.selectorText.startsWith("#")
         ) {
-          if (
-            "display" in rule.style &&
-            ["block", "inline-block", "none"].includes(rule.style.display)
-          ) {
-            watchSelectors.add(rule.selectorText);
+          if ("display" in rule.style) {
+            if (rule.style.display === "none") {
+              hideSelectors.add(rule.selectorText);
+            }
+            //  else if (["block", "inline-block"].includes(rule.style.display)) {
+            //   showSelectors.add(rule.selectorText);
+            // }
           }
-          if (
-            "visibility" in rule.style &&
-            ["visible", "hidden"].includes(rule.style.visibility)
-          ) {
-            watchSelectors.add(rule.selectorText);
+          if ("visibility" in rule.style) {
+            if (rule.style.visibility === "hidden") {
+              hideSelectors.add(rule.selectorText);
+            }
+            //  else if (rule.style.visibility === "visible") {
+            //   showSelectors.add(rule.selectorText);
+            // }
           }
         }
       }
@@ -105,10 +111,13 @@ function setupClassSets() {
   }
 }
 
+const VISIBILITY_HIDDEN_RE = /visibility:\s?hidden/g;
+const DISPLAY_NONE_RE = /display:\s?hidden/g;
+
 const mutationObserver = new MutationObserver((mutationList) => {
   throttledPruneMutationLog();
   for (const mutation of mutationList) {
-    if (!watchSelectors) {
+    if (!hideSelectors) {
       setupClassSets();
     }
     if (mutation.type === "childList") {
@@ -116,11 +125,14 @@ const mutationObserver = new MutationObserver((mutationList) => {
     } else if (mutation.type === "attributes") {
       const mutationTarget = mutation.target as HTMLElement;
       if (mutation.attributeName === "style") {
+        // TODO: Check if style mutation is overriding a class.
         const style = mutationTarget.style;
         if (
           style.display === "block" ||
-          style.display === "inline-block" ||
-          style.visibility === "visible"
+          (style.display === "inline-block" &&
+            mutation.oldValue?.search(DISPLAY_NONE_RE) !== -1) ||
+          (style.visibility === "visible" &&
+            mutation.oldValue?.search(VISIBILITY_HIDDEN_RE) !== -1)
         ) {
           mutationLog.push([Date.now(), mutation]);
         }
@@ -133,17 +145,36 @@ const mutationObserver = new MutationObserver((mutationList) => {
             mutationTarget.attributes.getNamedItem("id")?.value)
       ) {
         const mutationTarget = mutation.target as HTMLElement;
-        // TODO: only matches when mutation target exactly matches the rule selectorText
-        // Should match the difference of old -> current and use that to check if
-        // any future clicked element completes the selector.
-        for (const selectorText of watchSelectors) {
-          if (
-            mutationTarget.matches(selectorText) ||
-            "." + mutation.oldValue === selectorText
-          ) {
-            mutationLog.push([Date.now(), mutation]);
+        // Should only match when mutation target exactly matches the rule selectorText
+        // but does not match the old value.
+        for (const selectorText of hideSelectors) {
+          // target was hidden and the mutation removed the class doing the hiding
+          if (!mutationTarget.matches(selectorText)) {
+            let clone = mutationTarget.cloneNode() as Element;
+            if (mutation.attributeName === "class") {
+              clone.className = mutation.oldValue ?? "";
+            } else {
+              clone.id = mutation.oldValue ?? "";
+            }
+            if (clone.matches(selectorText)) {
+              mutationLog.push([Date.now(), mutation]);
+            }
           }
         }
+        // Unneeded?
+        // for (const selectorText of showSelectors) {
+        //   if (mutationTarget.matches(selectorText)) {
+        //     let clone = mutationTarget.cloneNode() as Element;
+        //     if (mutation.attributeName === "class") {
+        //       clone.className = mutation.oldValue ?? "";
+        //     } else {
+        //       clone.id = mutation.oldValue ?? "";
+        //     }
+        //     if (!clone.matches(selectorText)) {
+        //       mutationLog.push([Date.now(), mutation]);
+        //     }
+        //   }
+        // }
       }
     }
   }
