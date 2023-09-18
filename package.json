@@ -20,7 +20,7 @@
     "bundle:firefox:zip": "web-ext build -s dist/ -a . && mv ./shift_guard-$npm_package_version.zip ./shift_guard-firefox-v$npm_package_version.xpi",
     "bundle:chrome": "run-s bundle:chrome:*",
     "bundle:chrome:build": "run-s build:chrome",
-    "bundle:chrome:zip": "zip -r ./shift_guard-chrome-v$npm_package_version.zip ./dist",
+    "bundle:chrome:zip": "zip -r ./shift_guard-chrome-v$npm_package_version.zip ./dist -x *.DS_Store",
     "bundle:chrome:crx": "crx pack ./dist -o ./shift_guard-chrome-v$npm_package_version.crx && rm ./shift_guard-chrome-v$npm_package_version.zip",
     "compile": "run-s compile:*",
     "compile:tsc": "tsc",
