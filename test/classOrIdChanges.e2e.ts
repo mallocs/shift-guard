@@ -4,9 +4,9 @@ const isFirefox = browser.capabilities.browserName === "firefox";
 const baseUrl = "http://127.0.0.1:4567/";
 const defaultPageChangeInterval = 4000;
 
-describe("Class or id changes e2e tests", () => {
+describe("Class or id changes can make elements unclickable", () => {
   const testPageUrl = `${baseUrl}classOrIdChanges.html`;
-  it("should have shifted elements be unclickable when shift interval is less than the extension default", async () => {
+  it("should have elements be unclickable when a class change removes display none", async () => {
     await browser.setWindowSize(1675, 591);
     await browser.url(testPageUrl);
     await expect(browser).toHaveUrl(testPageUrl);
@@ -14,28 +14,85 @@ describe("Class or id changes e2e tests", () => {
     const intervalSpeedEl = await $("#intervalSpeedEl");
     const changeSelectEl = await $("#changeSelectEl");
     await intervalSpeedEl.setValue("500");
-    await browser.pause(defaultPageChangeInterval);
     await changeSelectEl.selectByAttribute("value", "className,display-none,");
     await changeEl.waitForDisplayed({
       timeout: 2000,
     });
     await changeEl.click();
     await expect(browser).toHaveUrl(testPageUrl);
+  });
+  it("should have elements be unclickable when a class change removes visibility hidden", async () => {
+    await browser.setWindowSize(1675, 591);
+    await browser.url(testPageUrl);
+    await expect(browser).toHaveUrl(testPageUrl);
+    const changeEl = await $('div[data-testid="changeEl"');
+    const intervalSpeedEl = await $("#intervalSpeedEl");
+    const changeSelectEl = await $("#changeSelectEl");
+    await intervalSpeedEl.setValue("500");
     await changeSelectEl.selectByAttribute(
       "value",
-      "className,visiblility-hidden,"
+      "className,visibility-hidden,"
     );
-    await browser.pause(200);
     await changeEl.waitForDisplayed({ timeout: 2000 });
     await changeEl.click();
     await expect(browser).toHaveUrl(testPageUrl);
+  });
+  it("should have elements be unclickable when an id change removes display none", async () => {
+    await browser.setWindowSize(1675, 591);
+    await browser.url(testPageUrl);
+    await expect(browser).toHaveUrl(testPageUrl);
+    const changeEl = await $('div[data-testid="changeEl"');
+    const intervalSpeedEl = await $("#intervalSpeedEl");
+    const changeSelectEl = await $("#changeSelectEl");
+    await intervalSpeedEl.setValue("500");
     await changeSelectEl.selectByAttribute("value", "id,display-none,");
-    await browser.pause(200);
     await changeEl.waitForDisplayed({ timeout: 2000 });
     await changeEl.click();
     await expect(browser).toHaveUrl(testPageUrl);
-    await changeSelectEl.selectByAttribute("value", "id,visiblility-hidden,");
-    await browser.pause(200);
+  });
+  it("should have elements be unclickable when an id change removes visibility hidden", async () => {
+    await browser.setWindowSize(1675, 591);
+    await browser.url(testPageUrl);
+    await expect(browser).toHaveUrl(testPageUrl);
+    const changeEl = await $('div[data-testid="changeEl"');
+    const intervalSpeedEl = await $("#intervalSpeedEl");
+    const changeSelectEl = await $("#changeSelectEl");
+    await intervalSpeedEl.setValue("500");
+    await changeSelectEl.selectByAttribute("value", "id,visibility-hidden,");
+    await changeEl.waitForDisplayed({ timeout: 2000 });
+    await changeEl.click();
+    await expect(browser).toHaveUrl(testPageUrl);
+  });
+
+  it("should have elements be unclickable when a class change causes a descendant selector to not match a rule with display none", async () => {
+    await browser.setWindowSize(1675, 591);
+    await browser.url(testPageUrl);
+    await expect(browser).toHaveUrl(testPageUrl);
+    const changeEl = await $('div[data-testid="changeEl"');
+    const intervalSpeedEl = await $("#intervalSpeedEl");
+    const changeSelectEl = await $("#changeSelectEl");
+    await intervalSpeedEl.setValue("500");
+    await changeSelectEl.selectByAttribute(
+      "value",
+      "className,display-none-complicated,"
+    );
+    await changeEl.waitForDisplayed({ timeout: 2000 });
+    await changeEl.click();
+    await expect(browser).toHaveUrl(testPageUrl);
+  });
+
+  it("should have elements be unclickable when a class change causes a descendant selector to not match a rule with visibility hidden", async () => {
+    await browser.setWindowSize(1675, 591);
+    await browser.url(testPageUrl);
+    await expect(browser).toHaveUrl(testPageUrl);
+    const changeEl = await $('div[data-testid="changeEl"');
+    const intervalSpeedEl = await $("#intervalSpeedEl");
+    const changeSelectEl = await $("#changeSelectEl");
+    await intervalSpeedEl.setValue("500");
+    await changeSelectEl.selectByAttribute(
+      "value",
+      "className,visibility-hidden-complicated,"
+    );
     await changeEl.waitForDisplayed({ timeout: 2000 });
     await changeEl.click();
     await expect(browser).toHaveUrl(testPageUrl);
@@ -53,15 +110,15 @@ describe("Shifted elements should be clickable after extension default time has 
     const intervalSpeedEl = await $("#intervalSpeedEl");
     const changeSelectEl = await $("#changeSelectEl");
     await expect(browser).toHaveUrl(testPageUrl);
-    await intervalSpeedEl.setValue("10000");
+    await intervalSpeedEl.setValue("4000");
     await changeSelectEl.selectByAttribute(
       "value",
-      "className,visiblility-hidden,"
+      "className,visibility-hidden,"
     );
     await changeEl.waitForDisplayed({
       timeout: defaultPageChangeInterval + 1000,
     });
-    await browser.pause(defaultExtensionInterval + 100);
+    await browser.pause(defaultExtensionInterval + 600);
     await changeEl.click();
     await expect(browser).not.toHaveUrl(testPageUrl);
   });
@@ -73,12 +130,12 @@ describe("Shifted elements should be clickable after extension default time has 
     const intervalSpeedEl = await $("#intervalSpeedEl");
     const changeSelectEl = await $("#changeSelectEl");
     await expect(browser).toHaveUrl(testPageUrl);
-    await intervalSpeedEl.setValue("10000");
+    await intervalSpeedEl.setValue("4000");
     await changeSelectEl.selectByAttribute("value", "className,display-none,");
     await changeEl.waitForDisplayed({
       timeout: defaultPageChangeInterval + 1000,
     });
-    await browser.pause(defaultExtensionInterval + 100);
+    await browser.pause(defaultExtensionInterval + 600);
     await changeEl.click();
     await expect(browser).not.toHaveUrl(testPageUrl);
   });
@@ -90,12 +147,12 @@ describe("Shifted elements should be clickable after extension default time has 
     const intervalSpeedEl = await $("#intervalSpeedEl");
     const changeSelectEl = await $("#changeSelectEl");
     await expect(browser).toHaveUrl(testPageUrl);
-    await intervalSpeedEl.setValue("10000");
-    await changeSelectEl.selectByAttribute("value", "id,visiblility-hidden,");
+    await intervalSpeedEl.setValue("4000");
+    await changeSelectEl.selectByAttribute("value", "id,visibility-hidden,");
     await changeEl.waitForDisplayed({
       timeout: defaultPageChangeInterval + 1000,
     });
-    await browser.pause(defaultExtensionInterval + 100);
+    await browser.pause(defaultExtensionInterval + 600);
     await changeEl.click();
     await expect(browser).not.toHaveUrl(testPageUrl);
   });
@@ -107,12 +164,12 @@ describe("Shifted elements should be clickable after extension default time has 
     const intervalSpeedEl = await $("#intervalSpeedEl");
     const changeSelectEl = await $("#changeSelectEl");
     await expect(browser).toHaveUrl(testPageUrl);
-    await intervalSpeedEl.setValue("10000");
+    await intervalSpeedEl.setValue("4000");
     await changeSelectEl.selectByAttribute("value", "id,display-none,");
     await changeEl.waitForDisplayed({
       timeout: defaultPageChangeInterval + 1000,
     });
-    await browser.pause(defaultExtensionInterval + 100);
+    await browser.pause(defaultExtensionInterval + 600);
     await changeEl.click();
     await expect(browser).not.toHaveUrl(testPageUrl);
   });

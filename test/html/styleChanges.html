@@ -66,19 +66,19 @@
     </div>
     <script>
       const changeSelectEl = document.getElementById("changeSelectEl");
+      const intervalSpeedEl = document.getElementById("intervalSpeedEl");
       const changeEl = document.getElementById("changeElChild").parentElement;
       let [property, onValue, offValue] = changeSelectEl.value.split(",");
 
-      let intervalSpeed = 4000;
+      let intervalSpeed = Number(intervalSpeedEl.value);
       let timeout;
       const changeFn = () => {
         changeEl.style[property] =
           changeEl.style[property] === onValue ? offValue : onValue;
-        timeout = window.setTimeout(changeFn, intervalSpeed);
+        timeout = window.setTimeout(changeFn, Number(intervalSpeedEl.value));
       };
 
       document.getElementById("intervalSpeedEl").onchange = (e) => {
-        intervalSpeed = Number(e.target.value);
         clearTimeout(timeout);
         changeFn();
       };

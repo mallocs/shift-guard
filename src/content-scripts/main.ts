@@ -83,25 +83,14 @@ function setupClassSets() {
         if (!(rule instanceof CSSStyleRule)) {
           continue;
         }
-        if (
-          rule.selectorText.startsWith(".") ||
-          rule.selectorText.startsWith("#")
-        ) {
-          if ("display" in rule.style) {
-            if (rule.style.display === "none") {
-              hideSelectors.add(rule.selectorText);
-            }
-            //  else if (["block", "inline-block"].includes(rule.style.display)) {
-            //   showSelectors.add(rule.selectorText);
-            // }
+        if ("display" in rule.style) {
+          if (rule.style.display === "none") {
+            hideSelectors.add(rule.selectorText);
           }
-          if ("visibility" in rule.style) {
-            if (rule.style.visibility === "hidden") {
-              hideSelectors.add(rule.selectorText);
-            }
-            //  else if (rule.style.visibility === "visible") {
-            //   showSelectors.add(rule.selectorText);
-            // }
+        }
+        if ("visibility" in rule.style) {
+          if (rule.style.visibility === "hidden") {
+            hideSelectors.add(rule.selectorText);
           }
         }
       }
@@ -144,20 +133,19 @@ const mutationObserver = new MutationObserver((mutationList) => {
             mutationTarget.attributes.getNamedItem("id")?.value)
       ) {
         const mutationTarget = mutation.target as HTMLElement;
-        // Should only match when mutation target exactly matches the rule selectorText
-        // but does not match the old value.
         for (const selectorText of hideSelectors) {
+          const oldValue = mutation.oldValue ? String(mutation.oldValue) : "";
+          const oldValueSelector =
+            mutation.attributeName === "class"
+              ? selectorText.replace(`.${oldValue}`, " * ")
+              : selectorText.replace(`#${oldValue}`, " * ");
           // target was hidden and the mutation removed the class doing the hiding
-          if (!mutationTarget.matches(selectorText)) {
-            let clone = mutationTarget.cloneNode() as Element;
-            if (mutation.attributeName === "class") {
-              clone.className = mutation.oldValue ?? "";
-            } else {
-              clone.id = mutation.oldValue ?? "";
-            }
-            if (clone.matches(selectorText)) {
-              mutationLog.push([Date.now(), mutation]);
-            }
+          if (
+            !mutationTarget.matches(selectorText) &&
+            (oldValueSelector === "" ||
+              mutationTarget.matches(oldValueSelector))
+          ) {
+            mutationLog.push([Date.now(), mutation]);
           }
         }
         // Unneeded?

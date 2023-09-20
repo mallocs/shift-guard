@@ -36,13 +36,19 @@
       .display-none {
         display: none;
       }
-      .visiblility-hidden {
+      .visibility-hidden {
         visibility: hidden;
       }
       #display-none {
         display: none;
       }
-      #visiblility-hidden {
+      #visibility-hidden {
+        visibility: hidden;
+      }
+      body .wrapper .display-none-complicated {
+        display: none;
+      }
+      body .wrapper .visibility-hidden-complicated {
         visibility: hidden;
       }
     </style>
@@ -56,11 +62,17 @@
       <option selected value="className,display-none,">
         class "display-none"
       </option>
-      <option value="className,visiblility-hidden,">
-        class "visiblility-hidden"
+      <option value="className,visibility-hidden,">
+        class "visibility-hidden"
       </option>
       <option value="id,display-none,">id "display-none"</option>
-      <option value="id,visiblility-hidden,">id "visiblility-hidden"</option>
+      <option value="id,visibility-hidden,">id "visibility-hidden"</option>
+      <option value="className,display-none-complicated,">
+        class "display-none-complicated"
+      </option>
+      <option value="className,visibility-hidden-complicated,">
+        class "visibility-hidden-complicated"
+      </option>
     </select>
     <input
       type="number"
@@ -78,26 +90,34 @@
       </div>
     </div>
     <script>
-      let intervalSpeed = 4000;
-      document.getElementById("intervalSpeedEl").onchange = (e) => {
-        intervalSpeed = Number(e.target.value);
-      };
       const changeSelectEl = document.getElementById("changeSelectEl");
+      const intervalSpeedEl = document.getElementById("intervalSpeedEl");
       const changeEl = document.getElementById("changeElChild").parentElement;
       let [attribute, onValue, offValue] = changeSelectEl.value.split(",");
+
+      let intervalSpeed = Number(intervalSpeedEl.value);
+      let timeout;
+      const changeFn = () => {
+        changeEl[attribute] =
+          changeEl[attribute] === onValue ? offValue : onValue;
+        timeout = window.setTimeout(changeFn, Number(intervalSpeedEl.value));
+      };
+
+      intervalSpeedEl.onchange = (e) => {
+        clearTimeout(timeout);
+        changeFn();
+      };
+
       changeEl[attribute] = offValue;
       changeSelectEl.onchange = (e) => {
         changeEl[attribute] = "";
         [attribute, onValue, offValue] = e.target.value.split(",");
-        changeEl[attribute] = onValue;
+        clearTimeout(timeout);
+        changeEl[attribute] = offValue; // cycle the element so the extension interval resets
+        changeFn();
       };
 
-      const changeFn = () => {
-        changeEl[attribute] =
-          changeEl[attribute] === onValue ? offValue : onValue;
-        window.setTimeout(changeFn, intervalSpeed);
-      };
-      window.setTimeout(changeFn, intervalSpeed);
+      timeout = window.setTimeout(changeFn, intervalSpeed);
     </script>
   </body>
 </html>

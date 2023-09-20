@@ -4,7 +4,7 @@ const isFirefox = browser.capabilities.browserName === "firefox";
 const baseUrl = "http://127.0.0.1:4567/";
 const defaultPageChangeInterval = 4000;
 
-describe("Elements should be unclickable when change interval is less than extension default", () => {
+describe("Style changes can make elements unclickable", () => {
   const testPageUrl = `${baseUrl}styleChanges.html`;
   it("should have elements unclickable when display changes between block and none", async () => {
     await browser.setWindowSize(1675, 591);
