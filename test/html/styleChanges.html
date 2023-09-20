@@ -9,6 +9,7 @@
         box-sizing: border-box;
       }
       .wrapper {
+        max-width: 400px;
         margin: 0 auto;
       }
 
@@ -26,7 +27,6 @@
       }
 
       .box {
-        background-color: #444;
         height: 200px;
         width: 400px;
         border-radius: 5px;
@@ -37,41 +37,62 @@
     <title>Display/Visibility change test</title>
   </head>
   <body>
-    <h1>Display/Visibility change test page</h1>
+    <h1>Display/Visibility style change test page</h1>
     <label for="changeSelectEl">Select a type of change:</label>
 
     <select name="changeSelectEl" id="changeSelectEl">
-      <option selected value="display,block,none">display: block</option>
-      <option value="display,block,none">display: inline-block</option>
-      <option value="visibility,visible,hidden">visibility: visible</option>
+      <option selected value="display,block,none">display: block->none</option>
+      <option value="display,inline-block,none">
+        display: inline-block->none
+      </option>
+      <option value="visibility,visible,hidden">
+        visibility: visible->hidden
+      </option>
     </select>
+    <input
+      type="number"
+      id="intervalSpeedEl"
+      name="intervalSpeedEl"
+      value="4000"
+      min="100"
+      max="10000"
+    />
     <div id="wrapper1" class="wrapper">
-      <div
-        onclick="location.href='https://google.com';"
-        class="box"
-        style="cursor: pointer"
-        id="changeEl"
-      >
-        Change element
+      <div data-testid="changeEl" onclick="location.href='https://google.com';">
+        <div id="changeElChild" class="box" style="cursor: pointer">
+          Change element
+        </div>
       </div>
-      <div id="shiftBox" class="box">Shift box</div>
-
-      <script>
-        const changeSelectEl = document.getElementById("changeSelectEl");
-        const changeEl = document.getElementById("changeEl");
-        let [property, onValue, offValue] = changeSelectEl.value.split(",");
-        changeEl.style[property] = onValue;
-        changeSelectEl.onchange = (e) => {
-          changeEl.style[property] = "";
-          [property, onValue, offValue] = e.target.value.split(",");
-          changeEl.style[property] = onValue;
-        };
-
-        window.setInterval(() => {
-          changeEl.style[property] =
-            changeEl.style[property] === onValue ? offValue : onValue;
-        }, 4000);
-      </script>
     </div>
+    <script>
+      const changeSelectEl = document.getElementById("changeSelectEl");
+      const changeEl = document.getElementById("changeElChild").parentElement;
+      let [property, onValue, offValue] = changeSelectEl.value.split(",");
+
+      let intervalSpeed = 4000;
+      let timeout;
+      const changeFn = () => {
+        changeEl.style[property] =
+          changeEl.style[property] === onValue ? offValue : onValue;
+        timeout = window.setTimeout(changeFn, intervalSpeed);
+      };
+
+      document.getElementById("intervalSpeedEl").onchange = (e) => {
+        intervalSpeed = Number(e.target.value);
+        clearTimeout(timeout);
+        changeFn();
+      };
+
+      changeEl.style[property] = offValue;
+      changeSelectEl.onchange = (e) => {
+        changeEl.style[property] = "";
+        [property, onValue, offValue] = e.target.value.split(",");
+        clearTimeout(timeout);
+        changeEl.style[property] = offValue; // cycle the element so the extension interval resets
+        changeFn();
+      };
+
+      timeout = window.setTimeout(changeFn, intervalSpeed);
+    </script>
   </body>
 </html>

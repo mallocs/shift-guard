@@ -112,7 +112,7 @@ function setupClassSets() {
 }
 
 const VISIBILITY_HIDDEN_RE = /visibility:\s?hidden/g;
-const DISPLAY_NONE_RE = /display:\s?hidden/g;
+const DISPLAY_NONE_RE = /display:\s?none/g;
 
 const mutationObserver = new MutationObserver((mutationList) => {
   throttledPruneMutationLog();
@@ -128,8 +128,7 @@ const mutationObserver = new MutationObserver((mutationList) => {
         // TODO: Check if style mutation is overriding a class.
         const style = mutationTarget.style;
         if (
-          style.display === "block" ||
-          (style.display === "inline-block" &&
+          ((style.display === "block" || style.display === "inline-block") &&
             mutation.oldValue?.search(DISPLAY_NONE_RE) !== -1) ||
           (style.visibility === "visible" &&
             mutation.oldValue?.search(VISIBILITY_HIDDEN_RE) !== -1)

@@ -61,7 +61,7 @@ declare global {
 
 export const config: Options.Testrunner = {
   ...baseConfig,
-  specs: ["./test/**/*.e2e.ts", "./test/**/*.e2e.js"],
+  specs: ["./test/**/*.e2e.ts"],
   capabilities: [
     {
       browserName: "firefox",

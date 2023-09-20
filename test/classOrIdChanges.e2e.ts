@@ -4,21 +4,12 @@ const isFirefox = browser.capabilities.browserName === "firefox";
 const baseUrl = "http://127.0.0.1:4567/";
 const defaultPageChangeInterval = 4000;
 
-describe("Web Extension e2e test", () => {
-  if (!isFirefox) {
-    it("should open popup window with the default shift duration", async () => {
-      await browser.openExtensionPopup("Shift Guard");
-      await expect($$("#extension-root")).toBeElementsArrayOfSize(1);
-    });
-    it("should have the default shift duration", async () => {
-      await browser.openExtensionPopup("Shift Guard");
-      await expect($$("#delayValue")).toHaveText("0.6s");
-    });
-  }
+describe("Class or id changes e2e tests", () => {
+  const testPageUrl = `${baseUrl}classOrIdChanges.html`;
   it("should have shifted elements be unclickable when shift interval is less than the extension default", async () => {
     await browser.setWindowSize(1675, 591);
-    await browser.url(`${baseUrl}classOrIdChanges.html`);
-    await expect(browser).toHaveUrl(`${baseUrl}classOrIdChanges.html`);
+    await browser.url(testPageUrl);
+    await expect(browser).toHaveUrl(testPageUrl);
     const changeEl = await $('div[data-testid="changeEl"');
     const intervalSpeedEl = await $("#intervalSpeedEl");
     const changeSelectEl = await $("#changeSelectEl");
@@ -29,7 +20,7 @@ describe("Web Extension e2e test", () => {
       timeout: 2000,
     });
     await changeEl.click();
-    await expect(browser).toHaveUrl(`${baseUrl}classOrIdChanges.html`);
+    await expect(browser).toHaveUrl(testPageUrl);
     await changeSelectEl.selectByAttribute(
       "value",
       "className,visiblility-hidden,"
@@ -37,30 +28,31 @@ describe("Web Extension e2e test", () => {
     await browser.pause(200);
     await changeEl.waitForDisplayed({ timeout: 2000 });
     await changeEl.click();
-    await expect(browser).toHaveUrl(`${baseUrl}classOrIdChanges.html`);
+    await expect(browser).toHaveUrl(testPageUrl);
     await changeSelectEl.selectByAttribute("value", "id,display-none,");
     await browser.pause(200);
     await changeEl.waitForDisplayed({ timeout: 2000 });
     await changeEl.click();
-    await expect(browser).toHaveUrl(`${baseUrl}classOrIdChanges.html`);
+    await expect(browser).toHaveUrl(testPageUrl);
     await changeSelectEl.selectByAttribute("value", "id,visiblility-hidden,");
     await browser.pause(200);
     await changeEl.waitForDisplayed({ timeout: 2000 });
     await changeEl.click();
-    await expect(browser).toHaveUrl(`${baseUrl}classOrIdChanges.html`);
+    await expect(browser).toHaveUrl(testPageUrl);
   });
 });
 
 describe("Shifted elements should be clickable after extension default time has passed", () => {
+  const testPageUrl = `${baseUrl}classOrIdChanges.html`;
   const defaultExtensionInterval = 600;
 
   it("should be clickable when a class change changes css visibility to hidden", async () => {
     await browser.setWindowSize(1675, 646);
-    await browser.url(`${baseUrl}classOrIdChanges.html`);
+    await browser.url(testPageUrl);
     const changeEl = await $('div[data-testid="changeEl"');
     const intervalSpeedEl = await $("#intervalSpeedEl");
     const changeSelectEl = await $("#changeSelectEl");
-    await expect(browser).toHaveUrl(`${baseUrl}classOrIdChanges.html`);
+    await expect(browser).toHaveUrl(testPageUrl);
     await intervalSpeedEl.setValue("10000");
     await changeSelectEl.selectByAttribute(
       "value",
@@ -71,16 +63,16 @@ describe("Shifted elements should be clickable after extension default time has 
     });
     await browser.pause(defaultExtensionInterval + 100);
     await changeEl.click();
-    await expect(browser).not.toHaveUrl(`${baseUrl}classOrIdChanges.html`);
+    await expect(browser).not.toHaveUrl(testPageUrl);
   });
 
   it("should be clickable when a class change changes css display to none", async () => {
     await browser.setWindowSize(1675, 646);
-    await browser.url(`${baseUrl}classOrIdChanges.html`);
+    await browser.url(testPageUrl);
     const changeEl = await $('div[data-testid="changeEl"');
     const intervalSpeedEl = await $("#intervalSpeedEl");
     const changeSelectEl = await $("#changeSelectEl");
-    await expect(browser).toHaveUrl(`${baseUrl}classOrIdChanges.html`);
+    await expect(browser).toHaveUrl(testPageUrl);
     await intervalSpeedEl.setValue("10000");
     await changeSelectEl.selectByAttribute("value", "className,display-none,");
     await changeEl.waitForDisplayed({
@@ -88,16 +80,16 @@ describe("Shifted elements should be clickable after extension default time has 
     });
     await browser.pause(defaultExtensionInterval + 100);
     await changeEl.click();
-    await expect(browser).not.toHaveUrl(`${baseUrl}classOrIdChanges.html`);
+    await expect(browser).not.toHaveUrl(testPageUrl);
   });
 
   it("should be clickable when an id change changes css visibility", async () => {
     await browser.setWindowSize(1675, 646);
-    await browser.url(`${baseUrl}classOrIdChanges.html`);
+    await browser.url(testPageUrl);
     const changeEl = await $('div[data-testid="changeEl"');
     const intervalSpeedEl = await $("#intervalSpeedEl");
     const changeSelectEl = await $("#changeSelectEl");
-    await expect(browser).toHaveUrl(`${baseUrl}classOrIdChanges.html`);
+    await expect(browser).toHaveUrl(testPageUrl);
     await intervalSpeedEl.setValue("10000");
     await changeSelectEl.selectByAttribute("value", "id,visiblility-hidden,");
     await changeEl.waitForDisplayed({
@@ -105,16 +97,16 @@ describe("Shifted elements should be clickable after extension default time has 
     });
     await browser.pause(defaultExtensionInterval + 100);
     await changeEl.click();
-    await expect(browser).not.toHaveUrl(`${baseUrl}classOrIdChanges.html`);
+    await expect(browser).not.toHaveUrl(testPageUrl);
   });
 
   it("should be clickable when an id change changes css display", async () => {
     await browser.setWindowSize(1675, 646);
-    await browser.url(`${baseUrl}classOrIdChanges.html`);
+    await browser.url(testPageUrl);
     const changeEl = await $('div[data-testid="changeEl"');
     const intervalSpeedEl = await $("#intervalSpeedEl");
     const changeSelectEl = await $("#changeSelectEl");
-    await expect(browser).toHaveUrl(`${baseUrl}classOrIdChanges.html`);
+    await expect(browser).toHaveUrl(testPageUrl);
     await intervalSpeedEl.setValue("10000");
     await changeSelectEl.selectByAttribute("value", "id,display-none,");
     await changeEl.waitForDisplayed({
@@ -122,6 +114,6 @@ describe("Shifted elements should be clickable after extension default time has 
     });
     await browser.pause(defaultExtensionInterval + 100);
     await changeEl.click();
-    await expect(browser).not.toHaveUrl(`${baseUrl}classOrIdChanges.html`);
+    await expect(browser).not.toHaveUrl(testPageUrl);
   });
 });
