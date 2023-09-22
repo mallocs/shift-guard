@@ -176,7 +176,11 @@ function isEventInRect(event: MouseEvent, rect: DOMRect) {
   );
 }
 
-function stopEvent(e: MouseEvent) {
+function stopClick(e: MouseEvent) {
+  // Only single clicks should be stopped.
+  if (e.detail === 2) {
+    return;
+  }
   e.preventDefault();
   e.stopPropagation();
   e.stopImmediatePropagation();
@@ -199,7 +203,7 @@ const mousedownHandlerFn = (e: MouseEvent) => {
     if (logEntry.type === "childList" && logEntry.addedNodes.length) {
       logEntry.addedNodes.forEach((node) => {
         if (e.target instanceof HTMLElement && node.contains(e.target)) {
-          stopEvent(e);
+          stopClick(e);
           return;
         }
       });
@@ -213,7 +217,7 @@ const mousedownHandlerFn = (e: MouseEvent) => {
       e.target instanceof HTMLElement &&
       logEntry.target.contains(e.target)
     ) {
-      stopEvent(e);
+      stopClick(e);
       return;
     }
   }
@@ -224,7 +228,7 @@ const mousedownHandlerFn = (e: MouseEvent) => {
       logEntry.node &&
       isEventInRect(e, logEntry.node.getBoundingClientRect())
     ) {
-      stopEvent(e);
+      stopClick(e);
       return;
     }
   }

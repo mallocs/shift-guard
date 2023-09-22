@@ -7,51 +7,65 @@ const defaultPageChangeInterval = 4000;
 describe("Style changes can make elements unclickable", () => {
   const testPageUrl = `${baseUrl}styleChanges.html`;
   it("should have elements unclickable when display changes between block and none", async () => {
-    await browser.setWindowSize(1675, 591);
+    await browser.setWindowSize(1600, 1400);
     await browser.url(testPageUrl);
     await expect(browser).toHaveUrl(testPageUrl);
     const changeEl = await $('div[data-testid="changeEl"');
     const intervalSpeedEl = await $("#intervalSpeedEl");
     const changeSelectEl = await $("#changeSelectEl");
-    await intervalSpeedEl.setValue("300");
+    await intervalSpeedEl.setValue("500");
     await changeSelectEl.selectByAttribute("value", "display,block,none");
     await changeEl.waitForDisplayed({
       timeout: 2000,
+      waitforInterval: 100,
     });
     await changeEl.click();
     await expect(browser).toHaveUrl(testPageUrl);
   });
   it("should have elements unclickable when display changes between inline-block and none", async () => {
-    await browser.setWindowSize(1675, 591);
+    await browser.setWindowSize(1600, 1400);
     await browser.url(testPageUrl);
     await expect(browser).toHaveUrl(testPageUrl);
     const changeEl = await $('div[data-testid="changeEl"');
     const intervalSpeedEl = await $("#intervalSpeedEl");
     const changeSelectEl = await $("#changeSelectEl");
-    await intervalSpeedEl.setValue("300");
+    await intervalSpeedEl.setValue("500");
     await changeSelectEl.selectByAttribute(
       "value",
       "display,inline-block,none"
     );
-    await changeEl.waitForDisplayed({ timeout: 2000 });
+    await changeEl.waitForDisplayed({ timeout: 2000, waitforInterval: 100 });
     await changeEl.click();
     await expect(browser).toHaveUrl(testPageUrl);
   });
   it("should have elements unclickable when visibility changes between visible and hidden", async () => {
-    await browser.setWindowSize(1675, 591);
+    await browser.setWindowSize(1600, 1400);
     await browser.url(testPageUrl);
     await expect(browser).toHaveUrl(testPageUrl);
     const changeEl = await $('div[data-testid="changeEl"');
     const intervalSpeedEl = await $("#intervalSpeedEl");
     const changeSelectEl = await $("#changeSelectEl");
-    await intervalSpeedEl.setValue("300");
+    await intervalSpeedEl.setValue("500");
     await changeSelectEl.selectByAttribute(
       "value",
       "visibility,visible,hidden"
     );
-    await changeEl.waitForDisplayed({ timeout: 2000 });
+    await changeEl.waitForDisplayed({ timeout: 2000, waitforInterval: 100 });
     await changeEl.click();
     await expect(browser).toHaveUrl(testPageUrl);
+  });
+  it("should have double clicks not be rejected", async () => {
+    await browser.setWindowSize(1600, 1400);
+    await browser.url(testPageUrl);
+    await expect(browser).toHaveUrl(testPageUrl);
+    const changeEl = await $('div[data-testid="changeEl"');
+    const intervalSpeedEl = await $("#intervalSpeedEl");
+    const changeSelectEl = await $("#changeSelectEl");
+    await intervalSpeedEl.setValue("500");
+    await changeSelectEl.selectByAttribute("value", "display,block,none");
+    await changeEl.waitForDisplayed({ timeout: 2000, waitforInterval: 100 });
+    await changeEl.doubleClick();
+    await expect(browser).not.toHaveUrl(testPageUrl);
   });
 });
 
@@ -60,7 +74,7 @@ describe("Changed elements should be clickable after extension default time has 
   const defaultExtensionInterval = 600;
 
   it("should be clickable when inline style changes display to block from none", async () => {
-    await browser.setWindowSize(1675, 646);
+    await browser.setWindowSize(1600, 1400);
     await browser.url(testPageUrl);
     const changeEl = await $('div[data-testid="changeEl"');
     const intervalSpeedEl = await $("#intervalSpeedEl");
@@ -70,6 +84,7 @@ describe("Changed elements should be clickable after extension default time has 
     await changeSelectEl.selectByAttribute("value", "display,block,none");
     await changeEl.waitForDisplayed({
       timeout: defaultPageChangeInterval + 1000,
+      waitforInterval: 100,
     });
     await browser.pause(defaultExtensionInterval + 600);
     await changeEl.click();
@@ -77,7 +92,7 @@ describe("Changed elements should be clickable after extension default time has 
   });
 
   it("should be clickable when inline style changes display to inline-block from none", async () => {
-    await browser.setWindowSize(1675, 646);
+    await browser.setWindowSize(1600, 1400);
     await browser.url(testPageUrl);
     const changeEl = await $('div[data-testid="changeEl"');
     const intervalSpeedEl = await $("#intervalSpeedEl");
@@ -90,6 +105,7 @@ describe("Changed elements should be clickable after extension default time has 
     );
     await changeEl.waitForDisplayed({
       timeout: defaultPageChangeInterval + 1000,
+      waitforInterval: 100,
     });
     await browser.pause(defaultExtensionInterval + 600);
     await changeEl.click();
@@ -97,7 +113,7 @@ describe("Changed elements should be clickable after extension default time has 
   });
 
   it("should be clickable when inline style changes visibility to visible from hidden", async () => {
-    await browser.setWindowSize(1675, 646);
+    await browser.setWindowSize(1600, 1400);
     await browser.url(testPageUrl);
     const changeEl = await $('div[data-testid="changeEl"');
     const intervalSpeedEl = await $("#intervalSpeedEl");
@@ -110,6 +126,7 @@ describe("Changed elements should be clickable after extension default time has 
     );
     await changeEl.waitForDisplayed({
       timeout: defaultPageChangeInterval + 1000,
+      waitforInterval: 100,
     });
     await browser.pause(defaultExtensionInterval + 600);
     await changeEl.click();
