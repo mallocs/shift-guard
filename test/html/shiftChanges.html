@@ -9,7 +9,7 @@
         box-sizing: border-box;
       }
       .wrapper {
-        max-width: 940px;
+        max-width: 400px;
         margin: 0 auto;
       }
 
@@ -17,85 +17,92 @@
         border: 2px solid rgb(233 171 88);
         border-radius: 5px;
         background-color: rgba(233 171 88 / 0.5);
-        padding: 1em;
-        color: #d9480f;
+        margin: 20px auto;
       }
 
       body {
-        margin: 40px;
-      }
-
-      #wrapper1 {
-        display: grid;
-        grid-template-columns: repeat(3, 200px);
-        grid-gap: 10px;
-        background-color: #fff;
-        color: #444;
-      }
-      #wrapper2 {
-        padding: 40px;
-        display: grid;
-        grid-template-columns: repeat(1, 600px);
-        grid-gap: 10px;
-        background-color: #fff;
-        color: #444;
+        min-height: 100vh;
+        padding: 1rem;
+        margin: 0;
       }
 
       .box {
-        background-color: #444;
         height: 200px;
-        color: #fff;
+        width: 400px;
         border-radius: 5px;
         padding: 20px;
         font-size: 150%;
       }
     </style>
-    <title>Shift test</title>
+    <title>Shift change test</title>
   </head>
   <body>
-    <h1>Shift test page</h1>
-    <h2>
-      Requires support for
-      <a href="https://developer.mozilla.org/en-US/docs/Web/API/LayoutShift"
-        >LayoutShift</a
-      >
-    </h2>
+    <h1>Shift change test page</h1>
+    <label for="changeSelectEl">Select a type of change:</label>
 
+    <select name="changeSelectEl" id="changeSelectEl">
+      <option selected value="display,block,none">display: block->none</option>
+      <option value="display,inline-block,none">
+        display: inline-block->none
+      </option>
+      <option value="visibility,visible,hidden">
+        visibility: visible->hidden
+      </option>
+    </select>
+    <input
+      type="number"
+      id="intervalSpeedEl"
+      name="intervalSpeedEl"
+      value="4000"
+      min="100"
+      max="10000"
+    />
     <div id="wrapper1" class="wrapper">
-      <div id="a" class="box a">A</div>
-      <div id="b" class="box b">B</div>
-      <div id="c" class="box c">C</div>
-      <div id="d" class="box d">D</div>
-      <div id="e" class="box e">E</div>
-      <div id="f" class="box f">F</div>
+      <div data-testid="changeEl" onclick="location.href='https://google.com';">
+        <div id="changeElChild" class="box" style="cursor: pointer">
+          Change element
+        </div>
+      </div>
     </div>
     <div id="wrapper2" class="wrapper">
-      <div class="box g">G</div>
-      <div id="insertDeleteItem" class="box h">H</div>
-      <a href="https://google.com"><div class="box i">I</div></a>
-      <div class="box j">J</div>
+      <div
+        data-testid="shiftEl"
+        class="box"
+        style="cursor: pointer"
+        onclick="location.href='https://google.com';"
+      >
+        Shift element
+      </div>
     </div>
     <script>
-      const originalInsertDeleteEl = document
-        .getElementById("insertDeleteItem")
-        .cloneNode(true);
+      const changeSelectEl = document.getElementById("changeSelectEl");
+      const intervalSpeedEl = document.getElementById("intervalSpeedEl");
+      const changeEl = document.getElementById("changeElChild").parentElement;
+      let [property, onValue, offValue] = changeSelectEl.value.split(",");
 
-      window.setInterval(() => {
-        const wrapper1 = document.getElementById("wrapper1");
-        [...wrapper1.children]
-          .map((item, index) => [(index + 1) % wrapper1.children.length, item])
-          .sort((a, b) => (a[0] > b[0] ? 1 : -1))
-          .forEach((item) => wrapper1.appendChild(item[1]));
-      }, 4000);
-      window.setInterval(() => {
-        const wrapper2 = document.getElementById("wrapper2");
-        const currentChildCount = wrapper2.children.length;
-        if (currentChildCount === 3) {
-          wrapper2.insertBefore(originalInsertDeleteEl, wrapper2.children[1]);
-        } else {
-          wrapper2.removeChild(wrapper2.children[1]);
-        }
-      }, 5000);
+      let intervalSpeed = Number(intervalSpeedEl.value);
+      let timeout;
+      const changeFn = () => {
+        changeEl.style[property] =
+          changeEl.style[property] === onValue ? offValue : onValue;
+        timeout = window.setTimeout(changeFn, Number(intervalSpeedEl.value));
+      };
+
+      intervalSpeedEl.onchange = (e) => {
+        clearTimeout(timeout);
+        changeFn();
+      };
+
+      changeEl.style[property] = offValue;
+      changeSelectEl.onchange = (e) => {
+        changeEl.style[property] = "";
+        [property, onValue, offValue] = e.target.value.split(",");
+        clearTimeout(timeout);
+        changeEl.style[property] = offValue; // cycle the element so the extension interval resets
+        changeFn();
+      };
+
+      timeout = window.setTimeout(changeFn, intervalSpeed);
     </script>
   </body>
 </html>

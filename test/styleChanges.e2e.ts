@@ -2,10 +2,10 @@ import { browser, $$, $, expect } from "@wdio/globals";
 
 const isFirefox = browser.capabilities.browserName === "firefox";
 const baseUrl = "http://127.0.0.1:4567/";
-const defaultPageChangeInterval = 4000;
 
 describe("Style changes can make elements unclickable", () => {
   const testPageUrl = `${baseUrl}styleChanges.html`;
+  const changeTimeout = 10000;
   it("should have elements unclickable when display changes between block and none", async () => {
     await browser.setWindowSize(1600, 1400);
     await browser.url(testPageUrl);
@@ -16,8 +16,8 @@ describe("Style changes can make elements unclickable", () => {
     await intervalSpeedEl.setValue("500");
     await changeSelectEl.selectByAttribute("value", "display,block,none");
     await changeEl.waitForDisplayed({
-      timeout: 2000,
-      waitforInterval: 100,
+      timeout: changeTimeout,
+      waitforInterval: 50,
     });
     await changeEl.click();
     await expect(browser).toHaveUrl(testPageUrl);
@@ -34,7 +34,10 @@ describe("Style changes can make elements unclickable", () => {
       "value",
       "display,inline-block,none"
     );
-    await changeEl.waitForDisplayed({ timeout: 2000, waitforInterval: 100 });
+    await changeEl.waitForDisplayed({
+      timeout: changeTimeout,
+      waitforInterval: 50,
+    });
     await changeEl.click();
     await expect(browser).toHaveUrl(testPageUrl);
   });
@@ -50,7 +53,10 @@ describe("Style changes can make elements unclickable", () => {
       "value",
       "visibility,visible,hidden"
     );
-    await changeEl.waitForDisplayed({ timeout: 2000, waitforInterval: 100 });
+    await changeEl.waitForDisplayed({
+      timeout: changeTimeout,
+      waitforInterval: 50,
+    });
     await changeEl.click();
     await expect(browser).toHaveUrl(testPageUrl);
   });
@@ -63,7 +69,10 @@ describe("Style changes can make elements unclickable", () => {
     const changeSelectEl = await $("#changeSelectEl");
     await intervalSpeedEl.setValue("500");
     await changeSelectEl.selectByAttribute("value", "display,block,none");
-    await changeEl.waitForDisplayed({ timeout: 2000, waitforInterval: 100 });
+    await changeEl.waitForDisplayed({
+      timeout: changeTimeout,
+      waitforInterval: 50,
+    });
     await changeEl.doubleClick();
     await expect(browser).not.toHaveUrl(testPageUrl);
   });
@@ -72,6 +81,7 @@ describe("Style changes can make elements unclickable", () => {
 describe("Changed elements should be clickable after extension default time has passed", () => {
   const testPageUrl = `${baseUrl}styleChanges.html`;
   const defaultExtensionInterval = 600;
+  const changeTimeout = 10000;
 
   it("should be clickable when inline style changes display to block from none", async () => {
     await browser.setWindowSize(1600, 1400);
@@ -83,8 +93,8 @@ describe("Changed elements should be clickable after extension default time has 
     await intervalSpeedEl.setValue("4000");
     await changeSelectEl.selectByAttribute("value", "display,block,none");
     await changeEl.waitForDisplayed({
-      timeout: defaultPageChangeInterval + 1000,
-      waitforInterval: 100,
+      timeout: changeTimeout,
+      waitforInterval: 50,
     });
     await browser.pause(defaultExtensionInterval + 600);
     await changeEl.click();
@@ -104,8 +114,8 @@ describe("Changed elements should be clickable after extension default time has 
       "display,inline-block,none"
     );
     await changeEl.waitForDisplayed({
-      timeout: defaultPageChangeInterval + 1000,
-      waitforInterval: 100,
+      timeout: changeTimeout,
+      waitforInterval: 50,
     });
     await browser.pause(defaultExtensionInterval + 600);
     await changeEl.click();
@@ -125,8 +135,8 @@ describe("Changed elements should be clickable after extension default time has 
       "visibility,visible,hidden"
     );
     await changeEl.waitForDisplayed({
-      timeout: defaultPageChangeInterval + 1000,
-      waitforInterval: 100,
+      timeout: changeTimeout,
+      waitforInterval: 50,
     });
     await browser.pause(defaultExtensionInterval + 600);
     await changeEl.click();

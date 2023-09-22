@@ -78,7 +78,7 @@
         timeout = window.setTimeout(changeFn, Number(intervalSpeedEl.value));
       };
 
-      document.getElementById("intervalSpeedEl").onchange = (e) => {
+      intervalSpeedEl.onchange = (e) => {
         clearTimeout(timeout);
         changeFn();
       };

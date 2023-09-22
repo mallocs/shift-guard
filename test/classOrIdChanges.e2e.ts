@@ -2,10 +2,10 @@ import { browser, $$, $, expect } from "@wdio/globals";
 
 const isFirefox = browser.capabilities.browserName === "firefox";
 const baseUrl = "http://127.0.0.1:4567/";
-const defaultPageChangeInterval = 4000;
 
 describe("Class or id changes can make elements unclickable", () => {
   const testPageUrl = `${baseUrl}classOrIdChanges.html`;
+  const changeTimeout = 10000;
   it("should have elements be unclickable when a class change removes display none", async () => {
     await browser.setWindowSize(1600, 1400);
     await browser.url(testPageUrl);
@@ -16,8 +16,8 @@ describe("Class or id changes can make elements unclickable", () => {
     await intervalSpeedEl.setValue("500");
     await changeSelectEl.selectByAttribute("value", "className,display-none,");
     await changeEl.waitForDisplayed({
-      timeout: 4000,
-      waitforInterval: 100,
+      timeout: changeTimeout,
+      waitforInterval: 50,
     });
     await changeEl.click();
     await expect(browser).toHaveUrl(testPageUrl);
@@ -25,7 +25,10 @@ describe("Class or id changes can make elements unclickable", () => {
       "value",
       "className,display-none,display-block"
     );
-    await changeEl.waitForDisplayed({ timeout: 4000, waitforInterval: 100 });
+    await changeEl.waitForDisplayed({
+      timeout: changeTimeout,
+      waitforInterval: 100,
+    });
     await changeEl.click();
     await expect(browser).toHaveUrl(testPageUrl);
   });
@@ -41,7 +44,10 @@ describe("Class or id changes can make elements unclickable", () => {
       "value",
       "className,visibility-hidden,"
     );
-    await changeEl.waitForDisplayed({ timeout: 4000, waitforInterval: 100 });
+    await changeEl.waitForDisplayed({
+      timeout: changeTimeout,
+      waitforInterval: 50,
+    });
     await changeEl.click();
     await expect(browser).toHaveUrl(testPageUrl);
   });
@@ -54,7 +60,10 @@ describe("Class or id changes can make elements unclickable", () => {
     const changeSelectEl = await $("#changeSelectEl");
     await intervalSpeedEl.setValue("500");
     await changeSelectEl.selectByAttribute("value", "id,display-none,");
-    await changeEl.waitForDisplayed({ timeout: 4000, waitforInterval: 100 });
+    await changeEl.waitForDisplayed({
+      timeout: changeTimeout,
+      waitforInterval: 50,
+    });
     await changeEl.click();
     await expect(browser).toHaveUrl(testPageUrl);
   });
@@ -67,7 +76,10 @@ describe("Class or id changes can make elements unclickable", () => {
     const changeSelectEl = await $("#changeSelectEl");
     await intervalSpeedEl.setValue("500");
     await changeSelectEl.selectByAttribute("value", "id,visibility-hidden,");
-    await changeEl.waitForDisplayed({ timeout: 4000, waitforInterval: 100 });
+    await changeEl.waitForDisplayed({
+      timeout: changeTimeout,
+      waitforInterval: 50,
+    });
     await changeEl.click();
     await expect(browser).toHaveUrl(testPageUrl);
   });
@@ -84,7 +96,10 @@ describe("Class or id changes can make elements unclickable", () => {
       "value",
       "className,display-none-complicated,"
     );
-    await changeEl.waitForDisplayed({ timeout: 4000, waitforInterval: 100 });
+    await changeEl.waitForDisplayed({
+      timeout: changeTimeout,
+      waitforInterval: 50,
+    });
     await changeEl.click();
     await expect(browser).toHaveUrl(testPageUrl);
   });
@@ -101,7 +116,10 @@ describe("Class or id changes can make elements unclickable", () => {
       "value",
       "className,visibility-hidden-complicated,"
     );
-    await changeEl.waitForDisplayed({ timeout: 4000, waitforInterval: 100 });
+    await changeEl.waitForDisplayed({
+      timeout: changeTimeout,
+      waitforInterval: 50,
+    });
     await changeEl.click();
     await expect(browser).toHaveUrl(testPageUrl);
   });
@@ -118,7 +136,10 @@ describe("Class or id changes can make elements unclickable", () => {
       "value",
       "className,display-none,display-block"
     );
-    await changeEl.waitForDisplayed({ timeout: 4000, waitforInterval: 100 });
+    await changeEl.waitForDisplayed({
+      timeout: changeTimeout,
+      waitforInterval: 50,
+    });
     // await changeEl.doubleClick();
     // For some reason .doubleClick() only seems to be registering 2 single clicks in FF
     // but it works with the style change tests.
@@ -135,6 +156,7 @@ describe("Class or id changes can make elements unclickable", () => {
 describe("Shifted elements should be clickable after extension default time has passed", () => {
   const testPageUrl = `${baseUrl}classOrIdChanges.html`;
   const defaultExtensionInterval = 600;
+  const changeTimeout = 10000;
 
   it("should be clickable when a class change changes css visibility to hidden", async () => {
     await browser.setWindowSize(1600, 1400);
@@ -149,8 +171,8 @@ describe("Shifted elements should be clickable after extension default time has 
       "className,visibility-hidden,"
     );
     await changeEl.waitForDisplayed({
-      timeout: defaultPageChangeInterval + 1000,
-      waitforInterval: 100,
+      timeout: changeTimeout,
+      waitforInterval: 50,
     });
     await browser.pause(defaultExtensionInterval + 600);
     await changeEl.click();
@@ -167,8 +189,8 @@ describe("Shifted elements should be clickable after extension default time has 
     await intervalSpeedEl.setValue("4000");
     await changeSelectEl.selectByAttribute("value", "className,display-none,");
     await changeEl.waitForDisplayed({
-      timeout: defaultPageChangeInterval + 1000,
-      waitforInterval: 100,
+      timeout: changeTimeout,
+      waitforInterval: 50,
     });
     await browser.pause(defaultExtensionInterval + 600);
     await changeEl.click();
@@ -185,8 +207,8 @@ describe("Shifted elements should be clickable after extension default time has 
     await intervalSpeedEl.setValue("4000");
     await changeSelectEl.selectByAttribute("value", "id,visibility-hidden,");
     await changeEl.waitForDisplayed({
-      timeout: defaultPageChangeInterval + 1000,
-      waitforInterval: 100,
+      timeout: changeTimeout,
+      waitforInterval: 50,
     });
     await browser.pause(defaultExtensionInterval + 600);
     await changeEl.click();
@@ -203,8 +225,8 @@ describe("Shifted elements should be clickable after extension default time has 
     await intervalSpeedEl.setValue("4000");
     await changeSelectEl.selectByAttribute("value", "id,display-none,");
     await changeEl.waitForDisplayed({
-      timeout: defaultPageChangeInterval + 1000,
-      waitforInterval: 100,
+      timeout: changeTimeout,
+      waitforInterval: 50,
     });
     await browser.pause(defaultExtensionInterval + 600);
     await changeEl.click();
