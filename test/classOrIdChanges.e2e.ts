@@ -6,7 +6,7 @@ const baseUrl = "http://127.0.0.1:4567/";
 describe("Class or id changes can make elements unclickable", () => {
   const testPageUrl = `${baseUrl}classOrIdChanges.html`;
   const changeTimeout = 10000;
-  it("should have elements be unclickable when a class change removes display none", async () => {
+  it("should have elements be unclickable when a class change removes display: none", async () => {
     await browser.setWindowSize(1600, 1400);
     await browser.url(testPageUrl);
     await expect(browser).toHaveUrl(testPageUrl);
@@ -32,7 +32,7 @@ describe("Class or id changes can make elements unclickable", () => {
     await changeEl.click();
     await expect(browser).toHaveUrl(testPageUrl);
   });
-  it("should have elements be unclickable when a class change removes visibility hidden", async () => {
+  it("should have elements be unclickable when a class change removes visibility: hidden", async () => {
     await browser.setWindowSize(1600, 1400);
     await browser.url(testPageUrl);
     await expect(browser).toHaveUrl(testPageUrl);
@@ -50,8 +50,18 @@ describe("Class or id changes can make elements unclickable", () => {
     });
     await changeEl.click();
     await expect(browser).toHaveUrl(testPageUrl);
+    await changeSelectEl.selectByAttribute(
+      "value",
+      "className,visibility-hidden,visibility-visible"
+    );
+    await changeEl.waitForDisplayed({
+      timeout: changeTimeout,
+      waitforInterval: 100,
+    });
+    await changeEl.click();
+    await expect(browser).toHaveUrl(testPageUrl);
   });
-  it("should have elements be unclickable when an id change removes display none", async () => {
+  it("should have elements be unclickable when an id change removes display: none", async () => {
     await browser.setWindowSize(1600, 1400);
     await browser.url(testPageUrl);
     await expect(browser).toHaveUrl(testPageUrl);
@@ -67,7 +77,7 @@ describe("Class or id changes can make elements unclickable", () => {
     await changeEl.click();
     await expect(browser).toHaveUrl(testPageUrl);
   });
-  it("should have elements be unclickable when an id change removes visibility hidden", async () => {
+  it("should have elements be unclickable when an id change removes visibility: hidden", async () => {
     await browser.setWindowSize(1600, 1400);
     await browser.url(testPageUrl);
     await expect(browser).toHaveUrl(testPageUrl);
@@ -84,7 +94,7 @@ describe("Class or id changes can make elements unclickable", () => {
     await expect(browser).toHaveUrl(testPageUrl);
   });
 
-  it("should have elements be unclickable when a class change causes a descendant selector to not match a rule with display none", async () => {
+  it("should have elements be unclickable when a class change causes a descendant selector to not match a rule with display: none", async () => {
     await browser.setWindowSize(1600, 1400);
     await browser.url(testPageUrl);
     await expect(browser).toHaveUrl(testPageUrl);
@@ -94,7 +104,7 @@ describe("Class or id changes can make elements unclickable", () => {
     await intervalSpeedEl.setValue("500");
     await changeSelectEl.selectByAttribute(
       "value",
-      "className,display-none-complicated,"
+      "className,display-none-specific,"
     );
     await changeEl.waitForDisplayed({
       timeout: changeTimeout,
@@ -104,7 +114,7 @@ describe("Class or id changes can make elements unclickable", () => {
     await expect(browser).toHaveUrl(testPageUrl);
   });
 
-  it("should have elements be unclickable when a class change causes a descendant selector to not match a rule with visibility hidden", async () => {
+  it("should have elements be unclickable when a class change causes a descendant selector to not match a rule with visibility: hidden", async () => {
     await browser.setWindowSize(1600, 1400);
     await browser.url(testPageUrl);
     await expect(browser).toHaveUrl(testPageUrl);
@@ -114,7 +124,87 @@ describe("Class or id changes can make elements unclickable", () => {
     await intervalSpeedEl.setValue("500");
     await changeSelectEl.selectByAttribute(
       "value",
-      "className,visibility-hidden-complicated,"
+      "className,visibility-hidden-specific,"
+    );
+    await changeEl.waitForDisplayed({
+      timeout: changeTimeout,
+      waitforInterval: 50,
+    });
+    await changeEl.click();
+    await expect(browser).toHaveUrl(testPageUrl);
+  });
+
+  it("should have elements be unclickable when a class change overrides display: none", async () => {
+    await browser.setWindowSize(1600, 1400);
+    await browser.url(testPageUrl);
+    await expect(browser).toHaveUrl(testPageUrl);
+    const changeEl = await $('div[data-testid="changeEl"');
+    const intervalSpeedEl = await $("#intervalSpeedEl");
+    const changeSelectEl = await $("#changeSelectEl");
+    await intervalSpeedEl.setValue("500");
+    await changeSelectEl.selectByAttribute(
+      "value",
+      "className,display-none,display-none display-block-specific"
+    );
+    await changeEl.waitForDisplayed({
+      timeout: changeTimeout,
+      waitforInterval: 50,
+    });
+    await changeEl.click();
+    await expect(browser).toHaveUrl(testPageUrl);
+  });
+
+  it("should have elements be unclickable when a class change overrides visibility: hidden", async () => {
+    await browser.setWindowSize(1600, 1400);
+    await browser.url(testPageUrl);
+    await expect(browser).toHaveUrl(testPageUrl);
+    const changeEl = await $('div[data-testid="changeEl"');
+    const intervalSpeedEl = await $("#intervalSpeedEl");
+    const changeSelectEl = await $("#changeSelectEl");
+    await intervalSpeedEl.setValue("500");
+    await changeSelectEl.selectByAttribute(
+      "value",
+      "className,visibility-hidden,visibility-hidden visibility-visible-specific"
+    );
+    await changeEl.waitForDisplayed({
+      timeout: changeTimeout,
+      waitforInterval: 50,
+    });
+    await changeEl.click();
+    await expect(browser).toHaveUrl(testPageUrl);
+  });
+
+  it("should have elements be unclickable when an id change overrides display: none", async () => {
+    await browser.setWindowSize(1600, 1400);
+    await browser.url(testPageUrl);
+    await expect(browser).toHaveUrl(testPageUrl);
+    const changeEl = await $('div[data-testid="changeEl"');
+    const intervalSpeedEl = await $("#intervalSpeedEl");
+    const changeSelectEl = await $("#changeSelectEl");
+    await intervalSpeedEl.setValue("500");
+    await changeSelectEl.selectByAttribute(
+      "value",
+      "className,display-none,display-none::id,,display-block"
+    );
+    await changeEl.waitForDisplayed({
+      timeout: changeTimeout,
+      waitforInterval: 50,
+    });
+    await changeEl.click();
+    await expect(browser).toHaveUrl(testPageUrl);
+  });
+
+  it("should have elements be unclickable when an id change overrides visibility: hidden", async () => {
+    await browser.setWindowSize(1600, 1400);
+    await browser.url(testPageUrl);
+    await expect(browser).toHaveUrl(testPageUrl);
+    const changeEl = await $('div[data-testid="changeEl"');
+    const intervalSpeedEl = await $("#intervalSpeedEl");
+    const changeSelectEl = await $("#changeSelectEl");
+    await intervalSpeedEl.setValue("500");
+    await changeSelectEl.selectByAttribute(
+      "value",
+      "className,visibility-hidden,visibility-hidden::id,,visibility-visible"
     );
     await changeEl.waitForDisplayed({
       timeout: changeTimeout,

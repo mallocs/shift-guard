@@ -45,41 +45,79 @@
       #display-none {
         display: none;
       }
+      #display-block {
+        display: block;
+      }
       #visibility-hidden {
         visibility: hidden;
       }
-      body .wrapper .display-none-complicated {
+      #visibility-visible {
+        visibility: visible;
+      }
+      body .wrapper .display-none-specific {
         display: none;
       }
-      body .wrapper .visibility-hidden-complicated {
+      body .wrapper .visibility-hidden-specific {
         visibility: hidden;
       }
+      body .wrapper .display-block-specific {
+        display: block;
+      }
+      body .wrapper .visibility-visible-specific {
+        visibility: visible;
+      }
     </style>
-    <title>className and id change test</title>
+    <title>class and id change test</title>
   </head>
   <body>
-    <h1>className and id change test page</h1>
-    <label for="changeSelectEl">Select a type of change:</label>
-
+    <h1>class and id change test page</h1>
+    <label for="changeSelectEl"
+      >Select a type of change for the change element:</label
+    >
     <select name="changeSelectEl" id="changeSelectEl">
       <option selected value="className,display-none,">
-        class "display-none"
+        className "display-none" to ""
       </option>
-      <option selected value="className,display-none,display-block">
-        class "display-none to display-block"
+      <option value="className,display-none,display-block">
+        className "display-none to display-block"
       </option>
       <option value="className,visibility-hidden,">
-        class "visibility-hidden"
+        className "visibility-hidden" to ""
+      </option>
+      <option value="className,visibility-hidden,visibility-visible">
+        className "visibility-hidden" to "visibility-visible"
       </option>
       <option value="id,display-none,">id "display-none"</option>
       <option value="id,visibility-hidden,">id "visibility-hidden"</option>
-      <option value="className,display-none-complicated,">
-        class "display-none-complicated"
+      <option value="className,display-none-specific,">
+        className "display-none-specific"
       </option>
-      <option value="className,visibility-hidden-complicated,">
-        class "visibility-hidden-complicated"
+      <option value="className,visibility-hidden-specific,">
+        className "visibility-hidden-specific"
+      </option>
+      <option
+        value="className,display-none,display-none display-block-specific"
+      >
+        className "display-none" to "display-none display-block-specific"
+      </option>
+      <option
+        value="className,visibility-hidden,visibility-hidden visibility-visible-specific"
+      >
+        className "visibility-hidden" to "visibility-hidden
+        visibility-visible-specific"
+      </option>
+      <option value="className,display-none,display-none::id,,display-block">
+        className,display-none,display-none::id,,display-block
+      </option>
+      <option
+        value="className,visibility-hidden,visibility-hidden::id,,visibility-visible"
+      >
+        className,visibility-hidden,visibility-hidden::id,,visibility-visible
       </option>
     </select>
+
+    <br />
+    <label for="intervalSpeedEl">Set the change interval:</label>
     <input
       type="number"
       id="intervalSpeedEl"
@@ -99,13 +137,21 @@
       const changeSelectEl = document.getElementById("changeSelectEl");
       const intervalSpeedEl = document.getElementById("intervalSpeedEl");
       const changeEl = document.getElementById("changeElChild").parentElement;
-      let [attribute, onValue, offValue] = changeSelectEl.value.split(",");
+
+      let [attribute1, onValue1, offValue1] = changeSelectEl.value
+        .split("::")[0]
+        .split(",");
+      let [attribute2, onValue2, offValue2] = (
+        changeSelectEl.value.split("::")[1] ?? ",,"
+      ).split(",");
 
       let intervalSpeed = Number(intervalSpeedEl.value);
       let timeout;
       const changeFn = () => {
-        changeEl[attribute] =
-          changeEl[attribute] === onValue ? offValue : onValue;
+        changeEl[attribute1] =
+          changeEl[attribute1] === onValue1 ? offValue1 : onValue1;
+        changeEl[attribute2] =
+          changeEl[attribute2] === onValue2 ? offValue2 : onValue2;
         timeout = window.setTimeout(changeFn, Number(intervalSpeedEl.value));
       };
 
@@ -114,12 +160,21 @@
         changeFn();
       };
 
-      changeEl[attribute] = offValue;
+      changeEl[attribute1] = offValue1;
+      changeEl[attribute2] = offValue2;
       changeSelectEl.onchange = (e) => {
-        changeEl[attribute] = "";
-        [attribute, onValue, offValue] = e.target.value.split(",");
+        changeEl[attribute1] = "";
+        changeEl[attribute2] = "";
+        // [attribute1, onValue1, offValue] = e.target.value.split(",");
+        [attribute1, onValue1, offValue1] = e.target.value
+          .split("::")[0]
+          .split(",");
+        [attribute2, onValue2, offValue2] = (
+          e.target.value.split("::")[1] ?? ",,"
+        ).split(",");
         clearTimeout(timeout);
-        changeEl[attribute] = offValue; // cycle the element so the extension interval resets
+        changeEl[attribute1] = offValue1; // cycle the element so the extension interval resets
+        changeEl[attribute2] = offValue2;
         changeFn();
       };
 

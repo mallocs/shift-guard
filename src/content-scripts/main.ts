@@ -71,10 +71,10 @@ const performanceObserver = new PerformanceObserver((list) => {
 });
 
 let hideSelectors: Set<string>;
-// let showSelectors: Set<string>;
+let showSelectors: Set<string>;
 function setupClassSets() {
   hideSelectors = new Set();
-  // showSelectors = new Set();
+  showSelectors = new Set();
 
   for (const styleSheet of document.styleSheets) {
     try {
@@ -86,11 +86,15 @@ function setupClassSets() {
         if ("display" in rule.style) {
           if (rule.style.display === "none") {
             hideSelectors.add(rule.selectorText);
+          } else if (["block", "inline-block"].includes(rule.style.display)) {
+            showSelectors.add(rule.selectorText);
           }
         }
         if ("visibility" in rule.style) {
           if (rule.style.visibility === "hidden") {
             hideSelectors.add(rule.selectorText);
+          } else if (rule.style.visibility === "visible") {
+            showSelectors.add(rule.selectorText);
           }
         }
       }
@@ -132,36 +136,37 @@ const mutationObserver = new MutationObserver((mutationList) => {
           mutation.oldValue !==
             mutationTarget.attributes.getNamedItem("id")?.value)
       ) {
+        const oldValue = mutation.oldValue ? String(mutation.oldValue) : "";
+        const oldValueSelector =
+          mutation.attributeName === "class"
+            ? `.${oldValue.trim().split(" ").join(".")}`
+            : `#${oldValue.trim()}`;
         const mutationTarget = mutation.target as HTMLElement;
         for (const selectorText of hideSelectors) {
-          const oldValue = mutation.oldValue ? String(mutation.oldValue) : "";
-          const oldValueSelector =
+          const oldValueStarSelector =
             mutation.attributeName === "class"
               ? selectorText.replace(`.${oldValue}`, " * ")
               : selectorText.replace(`#${oldValue}`, " * ");
           // target was hidden and the mutation removed the class doing the hiding
           if (
             !mutationTarget.matches(selectorText) &&
-            (oldValueSelector === "" ||
-              mutationTarget.matches(oldValueSelector))
+            (oldValue === "" || mutationTarget.matches(oldValueStarSelector))
           ) {
             mutationLog.push([Date.now(), mutation]);
           }
         }
-        // Unneeded?
-        // for (const selectorText of showSelectors) {
-        //   if (mutationTarget.matches(selectorText)) {
-        //     let clone = mutationTarget.cloneNode() as Element;
-        //     if (mutation.attributeName === "class") {
-        //       clone.className = mutation.oldValue ?? "";
-        //     } else {
-        //       clone.id = mutation.oldValue ?? "";
-        //     }
-        //     if (!clone.matches(selectorText)) {
-        //       mutationLog.push([Date.now(), mutation]);
-        //     }
-        //   }
-        // }
+        // Adding a class that shows the element by overriding a hide selector
+        if (oldValue === "") {
+          continue;
+        }
+        for (const selectorText of showSelectors) {
+          if (
+            mutationTarget.matches(selectorText) &&
+            mutationTarget.matches(oldValueSelector) // TODO: Check this is a hide selector.
+          ) {
+            mutationLog.push([Date.now(), mutation]);
+          }
+        }
       }
     }
   }
@@ -178,7 +183,7 @@ function isEventInRect(event: MouseEvent, rect: DOMRect) {
 
 function stopClick(e: MouseEvent) {
   // Only single clicks should be stopped.
-  if (e.detail === 2) {
+  if (e.detail >= 2) {
     return;
   }
   e.preventDefault();
@@ -197,7 +202,7 @@ const mousedownHandlerFn = (e: MouseEvent) => {
   // mutations sometimes happen in response to mousedown events but those are
   // triggered by the user and shouldn't be stopped, so we have to check
   // mutations when mousedown events happen and use that to cancel click events
-
+  // console.log(mutationLog);
   pruneMutationLog();
   for (const [logTime, logEntry] of mutationLog) {
     if (logEntry.type === "childList" && logEntry.addedNodes.length) {
