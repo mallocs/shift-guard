@@ -113,10 +113,24 @@ const mutationObserver = new MutationObserver((mutationList) => {
     if (!hideSelectors) {
       setupClassSets();
     }
-    if (mutation.type === "childList") {
-      mutationLog.push([Date.now(), mutation]);
-    } else if (mutation.type === "attributes") {
+    // TODO: Find the cases where these mutations cause shifts.
+    // if (mutation.type === "childList") {
+    //   mutationLog.push([Date.now(), mutation]);
+    //   continue;
+    // } else
+    if (mutation.type === "attributes") {
       const mutationTarget = mutation.target as HTMLElement;
+      const oldValue = String(mutation.oldValue ?? "");
+
+      // Sometimes a mutation that seems unchanged gets added to the list
+      if (
+        mutation.attributeName &&
+        oldValue ===
+          mutationTarget.attributes.getNamedItem(mutation.attributeName)?.value
+      ) {
+        continue;
+      }
+
       if (mutation.attributeName === "style") {
         // TODO: Check if style mutation is overriding a class.
         const style = mutationTarget.style;
@@ -127,44 +141,93 @@ const mutationObserver = new MutationObserver((mutationList) => {
             mutation.oldValue?.search(VISIBILITY_HIDDEN_RE) !== -1)
         ) {
           mutationLog.push([Date.now(), mutation]);
+          continue;
         }
-      } else if (
-        (mutation.attributeName === "class" &&
-          mutation.oldValue !==
-            mutationTarget.attributes.getNamedItem("class")?.value) ||
-        (mutation.attributeName === "id" &&
-          mutation.oldValue !==
-            mutationTarget.attributes.getNamedItem("id")?.value)
-      ) {
-        const oldValue = mutation.oldValue ? String(mutation.oldValue) : "";
-        const oldValueSelector =
-          mutation.attributeName === "class"
-            ? `.${oldValue.trim().split(" ").join(".")}`
-            : `#${oldValue.trim()}`;
-        const mutationTarget = mutation.target as HTMLElement;
-        for (const selectorText of hideSelectors) {
-          const oldValueStarSelector =
-            mutation.attributeName === "class"
-              ? selectorText.replace(`.${oldValue}`, " * ")
-              : selectorText.replace(`#${oldValue}`, " * ");
-          // target was hidden and the mutation removed the class doing the hiding
-          if (
-            !mutationTarget.matches(selectorText) &&
-            (oldValue === "" || mutationTarget.matches(oldValueStarSelector))
-          ) {
+      } else if (mutation.attributeName === "id") {
+        // 1) remove hide id
+        // 2) override hide class with show id
+        for (const hideSelectorText of hideSelectors) {
+          // 2)
+          if (mutationTarget.matches(hideSelectorText)) {
+            for (const showSelectorText of showSelectors) {
+              if (
+                !showSelectorText.includes(
+                  `#${mutationTarget.attributes.getNamedItem("id")?.value}`
+                )
+              ) {
+                continue;
+              }
+              if (mutationTarget.matches(showSelectorText)) {
+                mutationLog.push([Date.now(), mutation]);
+                break;
+              }
+            }
+          }
+          // 1)
+          const oldValueStarSelector = oldValue
+            .trim()
+            .split(" ")
+            .filter((val) => val !== "")
+            .reduce(
+              (prev, current) =>
+                prev.replaceAll(
+                  new RegExp(`(^|[\\s]+)#${current}($|[\\s]+)`, "g"),
+                  " * "
+                ),
+              hideSelectorText
+            )
+            .trim();
+          if (oldValueStarSelector === hideSelectorText) {
+            continue;
+          }
+
+          if (mutationTarget.matches(oldValueStarSelector)) {
             mutationLog.push([Date.now(), mutation]);
+            break;
           }
         }
-        // Adding a class that shows the element by overriding a hide selector
+      } else if (
+        mutation.attributeName === "class"
+        // 1) override hide class with more specific show selector
+        // 2) remove hide class
+      ) {
+        // class mutation needs to be overriding or removing something from the oldValue to appear.
         if (oldValue === "") {
           continue;
         }
-        for (const selectorText of showSelectors) {
-          if (
-            mutationTarget.matches(selectorText) &&
-            mutationTarget.matches(oldValueSelector) // TODO: Check this is a hide selector.
-          ) {
-            mutationLog.push([Date.now(), mutation]);
+        // old value matches a hide selector
+        for (const hideSelectorText of hideSelectors) {
+          const oldValueStarSelector = oldValue
+            .trim()
+            .split(" ")
+            .filter((val) => val !== "")
+            .reduce(
+              (prev, current) =>
+                prev.replaceAll(
+                  new RegExp(`(^|[\\s]+)\.${current}($|[\\s]+)`, "g"),
+                  " * "
+                ),
+              hideSelectorText
+            )
+            .trim();
+
+          if (oldValueStarSelector === hideSelectorText) {
+            continue;
+          }
+
+          if (mutationTarget.matches(oldValueStarSelector)) {
+            // 2) mutated value does not match hide selector because it was removed
+            if (!mutationTarget.matches(hideSelectorText)) {
+              mutationLog.push([Date.now(), mutation]);
+              break;
+            }
+            // 1) Adding a class that shows the element by overriding a hide selector
+            for (const showSelectorText of showSelectors) {
+              if (mutationTarget.matches(showSelectorText)) {
+                mutationLog.push([Date.now(), mutation]);
+                break;
+              }
+            }
           }
         }
       }
@@ -202,8 +265,8 @@ const mousedownHandlerFn = (e: MouseEvent) => {
   // mutations sometimes happen in response to mousedown events but those are
   // triggered by the user and shouldn't be stopped, so we have to check
   // mutations when mousedown events happen and use that to cancel click events
-  // console.log(mutationLog);
   pruneMutationLog();
+
   for (const [logTime, logEntry] of mutationLog) {
     if (logEntry.type === "childList" && logEntry.addedNodes.length) {
       logEntry.addedNodes.forEach((node) => {
@@ -257,13 +320,15 @@ function stop() {
   document.removeEventListener("mousedown", mousedownHandlerFn, true);
 }
 
-browser.storage.local.get(appStorageStatusKey).then((res) => {
-  if (res.status !== appStatusStopped) {
-    start();
-  }
-});
+browser.storage.local
+  .get(appStorageStatusKey)
+  .then((res: Record<string, any>) => {
+    if (res.status !== appStatusStopped) {
+      start();
+    }
+  });
 
-browser.storage.onChanged.addListener((changes, namespace) => {
+browser.storage.onChanged.addListener((changes, namespace: string) => {
   if (namespace !== "local") {
     return;
   }

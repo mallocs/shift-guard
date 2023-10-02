@@ -13,33 +13,33 @@ describe("Shift changes can make elements unclickable", () => {
       await browser.setWindowSize(1600, 1400);
       await browser.url(testPageUrl);
       await expect(browser).toHaveUrl(testPageUrl);
-      const changeEl = await $('div[data-testid="shiftEl"');
+      const shiftEl = await $('div[data-testid="shiftEl"');
       const intervalSpeedEl = await $("#intervalSpeedEl");
       const changeSelectEl = await $("#changeSelectEl");
       await intervalSpeedEl.setValue("500");
       await changeSelectEl.selectByAttribute("value", "display,block,none");
-      await changeEl.waitForDisplayed({
+      await shiftEl.waitForDisplayed({
         timeout: changeTimeout,
       });
-      await changeEl.click();
+      await shiftEl.click();
       await expect(browser).toHaveUrl(testPageUrl);
     });
 
     it("should have elements be clickable after extension default time has passed", async () => {
       await browser.setWindowSize(1600, 1400);
       await browser.url(testPageUrl);
-      const changeEl = await $('div[data-testid="shiftEl"');
+      const shiftEl = await $('div[data-testid="shiftEl"');
       const intervalSpeedEl = await $("#intervalSpeedEl");
       const changeSelectEl = await $("#changeSelectEl");
       await expect(browser).toHaveUrl(testPageUrl);
       await intervalSpeedEl.setValue("5000");
       await changeSelectEl.selectByAttribute("value", "display,block,none");
       await browser.pause(defaultExtensionInterval + 600);
-      await changeEl.waitForDisplayed({
+      await shiftEl.waitForDisplayed({
         timeout: changeTimeout,
         waitforInterval: 50,
       });
-      await changeEl.click();
+      await shiftEl.click();
       await expect(browser).not.toHaveUrl(testPageUrl);
     });
   }
