@@ -118,122 +118,146 @@ const mutationObserver = new MutationObserver((mutationList) => {
     //   mutationLog.push([Date.now(), mutation]);
     //   continue;
     // } else
-    if (mutation.type === "attributes") {
-      const mutationTarget = mutation.target as HTMLElement;
-      const oldValue = String(mutation.oldValue ?? "");
+    if (
+      mutation.type === "attributes" &&
+      shouldLogAttributeMutation(mutation)
+    ) {
+      mutationLog.push([Date.now(), mutation]);
+    }
+  }
+});
 
-      // Sometimes a mutation that seems unchanged gets added to the list
-      if (
-        mutation.attributeName &&
-        oldValue ===
-          mutationTarget.attributes.getNamedItem(mutation.attributeName)?.value
-      ) {
-        continue;
-      }
+function shouldLogAttributeMutation(mutation: MutationRecord): boolean {
+  const mutationTarget = mutation.target as HTMLElement;
+  const oldValue = String(mutation.oldValue ?? "");
 
-      if (mutation.attributeName === "style") {
-        // TODO: Check if style mutation is overriding a class.
-        const style = mutationTarget.style;
+  // Sometimes a mutation that seems unchanged gets added to the list
+  if (
+    mutation.attributeName &&
+    oldValue ===
+      mutationTarget.attributes.getNamedItem(mutation.attributeName)?.value
+  ) {
+    return false;
+  }
+  return (
+    (mutation.attributeName === "style" && shouldLogStyleMutation(mutation)) ||
+    (mutation.attributeName === "id" && shouldLogIdMutation(mutation)) ||
+    (mutation.attributeName === "class" && shouldLogClassMutation(mutation))
+  );
+}
+
+function shouldLogStyleMutation(mutation: MutationRecord): boolean {
+  // TODO: Check if style mutation is overriding a class.
+  const style = (mutation.target as HTMLElement).style;
+  if (
+    ((style.display === "block" || style.display === "inline-block") &&
+      mutation.oldValue?.search(DISPLAY_NONE_RE) !== -1) ||
+    (style.visibility === "visible" &&
+      mutation.oldValue?.search(VISIBILITY_HIDDEN_RE) !== -1)
+  ) {
+    return true;
+  }
+  return false;
+}
+
+function shouldLogIdMutation(mutation: MutationRecord): boolean {
+  // 1) remove hide id
+  // 2) override hide class with show id
+
+  const mutationTarget = mutation.target as HTMLElement;
+  const oldValue = String(mutation.oldValue ?? "");
+  for (const hideSelectorText of hideSelectors) {
+    // 2)
+    if (mutationTarget.matches(hideSelectorText)) {
+      for (const showSelectorText of showSelectors) {
         if (
-          ((style.display === "block" || style.display === "inline-block") &&
-            mutation.oldValue?.search(DISPLAY_NONE_RE) !== -1) ||
-          (style.visibility === "visible" &&
-            mutation.oldValue?.search(VISIBILITY_HIDDEN_RE) !== -1)
+          !showSelectorText.includes(
+            `#${mutationTarget.attributes.getNamedItem("id")?.value}`
+          )
         ) {
-          mutationLog.push([Date.now(), mutation]);
           continue;
         }
-      } else if (mutation.attributeName === "id") {
-        // 1) remove hide id
-        // 2) override hide class with show id
-        for (const hideSelectorText of hideSelectors) {
-          // 2)
-          if (mutationTarget.matches(hideSelectorText)) {
-            for (const showSelectorText of showSelectors) {
-              if (
-                !showSelectorText.includes(
-                  `#${mutationTarget.attributes.getNamedItem("id")?.value}`
-                )
-              ) {
-                continue;
-              }
-              if (mutationTarget.matches(showSelectorText)) {
-                mutationLog.push([Date.now(), mutation]);
-                break;
-              }
-            }
-          }
-          // 1)
-          const oldValueStarSelector = oldValue
-            .trim()
-            .split(" ")
-            .filter((val) => val !== "")
-            .reduce(
-              (prev, current) =>
-                prev.replaceAll(
-                  new RegExp(`(^|[\\s]+)#${current}($|[\\s]+)`, "g"),
-                  " * "
-                ),
-              hideSelectorText
-            )
-            .trim();
-          if (oldValueStarSelector === hideSelectorText) {
-            continue;
-          }
-
-          if (mutationTarget.matches(oldValueStarSelector)) {
-            mutationLog.push([Date.now(), mutation]);
-            break;
-          }
+        if (mutationTarget.matches(showSelectorText)) {
+          return true;
         }
-      } else if (
-        mutation.attributeName === "class"
-        // 1) override hide class with more specific show selector
-        // 2) remove hide class
-      ) {
-        // class mutation needs to be overriding or removing something from the oldValue to appear.
-        if (oldValue === "") {
-          continue;
-        }
-        // old value matches a hide selector
-        for (const hideSelectorText of hideSelectors) {
-          const oldValueStarSelector = oldValue
-            .trim()
-            .split(" ")
-            .filter((val) => val !== "")
-            .reduce(
-              (prev, current) =>
-                prev.replaceAll(
-                  new RegExp(`(^|[\\s]+)\.${current}($|[\\s]+)`, "g"),
-                  " * "
-                ),
-              hideSelectorText
-            )
-            .trim();
+      }
+    }
+    // 1)
+    if (
+      targetDidMatch(hideSelectorText, oldValue, "#", mutationTarget) &&
+      !mutationTarget.matches(hideSelectorText)
+    ) {
+      return true;
+    }
+  }
+  return false;
+}
 
-          if (oldValueStarSelector === hideSelectorText) {
-            continue;
-          }
+function shouldLogClassMutation(mutation: MutationRecord): boolean {
+  // 1) override hide class with more specific show selector
+  // 2) remove hide class
 
-          if (mutationTarget.matches(oldValueStarSelector)) {
-            // 2) mutated value does not match hide selector because it was removed
-            if (!mutationTarget.matches(hideSelectorText)) {
-              mutationLog.push([Date.now(), mutation]);
-              break;
-            }
-            // 1) Adding a class that shows the element by overriding a hide selector
-            for (const showSelectorText of showSelectors) {
-              if (mutationTarget.matches(showSelectorText)) {
-                mutationLog.push([Date.now(), mutation]);
-                break;
-              }
-            }
-          }
+  const mutationTarget = mutation.target as HTMLElement;
+  const oldValue = String(mutation.oldValue ?? "");
+  // class mutation needs to be overriding or removing something from the oldValue to appear.
+  if (oldValue === "") {
+    return false;
+  }
+  // old value matches a hide selector
+  for (const hideSelectorText of hideSelectors) {
+    if (targetDidMatch(hideSelectorText, oldValue, "\\.", mutationTarget)) {
+      // 2) mutated value does not match hide selector because it was removed
+      if (!mutationTarget.matches(hideSelectorText)) {
+        return true;
+      }
+      // 1) Adding a class that shows the element by overriding a hide selector
+      for (const showSelectorText of showSelectors) {
+        if (mutationTarget.matches(showSelectorText)) {
+          return true;
         }
       }
     }
   }
-});
+  return false;
+}
+
+// https://developer.mozilla.org/en-US/docs/Web/API/MutationRecord/oldValue
+// Turn the oldValue into a selector to check whether a target would have
+// matched the fromSelector.
+// ex) getStarSelector('display-none-specific', 'body .wrapper .display-none-specific', '\\.') => 'body .wrapper *'
+// if this matches the mutation.target, then fromSelector was being applied to the target.
+function getStarSelector(
+  fromSelector: string,
+  oldValue: string,
+  prefix: string
+) {
+  return oldValue
+    .trim()
+    .split(" ")
+    .filter((val) => val !== "")
+    .reduce(
+      (prev, current) =>
+        prev.replaceAll(
+          new RegExp(`(^|[\\s]+)${prefix}${current}($|[\\s]+)`, "g"),
+          " * "
+        ),
+      fromSelector
+    )
+    .trim();
+}
+
+function targetDidMatch(
+  fromSelector: string,
+  oldValue: string,
+  prefix: string,
+  target: HTMLElement
+): boolean {
+  const oldValueStarSelector = getStarSelector(fromSelector, oldValue, prefix);
+  return (
+    oldValueStarSelector !== fromSelector &&
+    target.matches(oldValueStarSelector)
+  );
+}
 
 function isEventInRect(event: MouseEvent, rect: DOMRect) {
   return (
