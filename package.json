@@ -35,7 +35,7 @@
     "zip": "zip -r shift_guard.zip src dist test *.json *.ts -x *.DS_Store"
   },
   "devDependencies": {
-    "@types/webextension-polyfill": "^0.10.2",
+    "@types/webextension-polyfill": "^0.10.4",
     "@wdio/browser-runner": "^8.14.6",
     "@wdio/cli": "^8.14.6",
     "@wdio/firefox-profile-service": "^8.14.0",

@@ -352,7 +352,7 @@ browser.storage.local
     }
   });
 
-browser.storage.onChanged.addListener((changes, namespace: string) => {
+browser.storage.onChanged.addListener((changes, namespace) => {
   if (namespace !== "local") {
     return;
   }
