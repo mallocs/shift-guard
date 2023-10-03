@@ -237,7 +237,7 @@ function getStarSelector(
     .filter((val) => val !== "")
     .reduce(
       (prev, current) =>
-        prev.replaceAll(
+        prev.replace(
           new RegExp(`(^|[\\s]+)${prefix}${current}($|[\\s]+)`, "g"),
           " * "
         ),
@@ -253,6 +253,7 @@ function targetDidMatch(
   target: HTMLElement
 ): boolean {
   const oldValueStarSelector = getStarSelector(fromSelector, oldValue, prefix);
+
   return (
     oldValueStarSelector !== fromSelector &&
     target.matches(oldValueStarSelector)
