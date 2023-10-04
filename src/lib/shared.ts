@@ -31,7 +31,7 @@ async function getStoredDelay() {
   return storedDelay.delay || defaultDelay;
 }
 
-export const defaultDelay = 600;
+export const defaultDelay = 500;
 export const appStatusStopped = "stopped";
 export const appStatusRunning = "";
 export const appStorageDelayKey = "delay";
