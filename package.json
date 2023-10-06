@@ -1,7 +1,7 @@
 {
   "name": "shift-guard",
   "version": "0.0.1",
-  "description": "Prevent accidental clicks on recently shifted content by opening a prompt asking whether to continue.",
+  "description": "Prevent accidental clicks when content suddenly shifts or appears.",
   "author": "Marcus Ulrich <shiftguard@mallocs.net",
   "license": "ISC",
   "type": "module",
