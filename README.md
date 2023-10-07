@@ -8,3 +8,15 @@ Shift Guard works by logging various types of website changes and throwing out c
 
 On the other hand, accidentally clicking something can be a costly mistake. If you're lucky, it just means waiting for the page to reload after going back. At worst it can mean a loss of unsaved work or an unintended purchase.
 
+#### Demo/Test pages
+* [Class or id changes that make an element appear](https://mallocs.github.io/shift-guard/test/html/classOrIdChanges.html)
+
+* [Style changes that make an element appear](https://mallocs.github.io/shift-guard/test/html/styleChanges.html)
+
+* [Shift changes](https://mallocs.github.io/shift-guard/test/html/shiftChanges.html)
+
+#### Note
+Shift detection uses the experimental [LayoutShift interface of the Performance API](https://developer.mozilla.org/en-US/docs/Web/API/LayoutShift) which is currently only implemented by Chrome. Class, id, and style changes will still be detected by Firefox.
+
+#### Support
+[Submit bugs or issues](https://github.com/mallocs/shift-guard)
