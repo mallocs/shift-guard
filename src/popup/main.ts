@@ -33,20 +33,22 @@ onOffButtonEl.addEventListener("click", async () => {
 });
 
 function start() {
-  onOffButtonEl.textContent = "OFF";
+  onOffButtonEl.textContent = "Turn Off";
   onOffButtonEl.setAttribute(
     "title",
-    "Stop extension processing and click handling"
+    "Turn off extension processing and click handling"
   );
+  onOffButtonEl.classList.add("active");
   startApp();
 }
 
 function stop() {
-  onOffButtonEl.textContent = "ON";
+  onOffButtonEl.textContent = "Turn On";
   onOffButtonEl.setAttribute(
     "title",
-    "Reject clicks on recently shifted elements"
+    "Turn on click protection on recently shifted elements"
   );
+  onOffButtonEl.classList.remove("active");
   stopApp();
 }
 
