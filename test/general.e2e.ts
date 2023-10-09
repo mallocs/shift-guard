@@ -12,7 +12,7 @@ describe("General e2e tests", () => {
     });
     it("should have the default shift duration", async () => {
       await browser.openExtensionPopup("Shift Guard");
-      await expect($$("#delayValue")).toHaveText("0.6s");
+      await expect($$("#delayValue")).toHaveText("0.5s");
     });
   }
 });
