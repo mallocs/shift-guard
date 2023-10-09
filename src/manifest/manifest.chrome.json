@@ -34,7 +34,6 @@
     "type": "module"
   },
   "permissions": [
-    "management",
     "storage"
   ],
   "host_permissions": [

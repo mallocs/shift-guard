@@ -35,7 +35,6 @@
   },
   "permissions": [
     "<all_urls>",
-    "management",
     "storage"
   ],
   "browser_specific_settings": {
