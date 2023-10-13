@@ -221,10 +221,14 @@ function shouldLogClassMutation(mutation: MutationRecord): boolean {
   return false;
 }
 
+// Filter out regex special characters from string to avoid a syntax error, ie
+// Uncaught SyntaxError: Invalid regular expression: /(^|[\s]+)\.lg:h-[calc(100vh-3rem)]($|[\s]+)/g: Range out of order in character class
+const STRING_ESCAPE_RE = /[|\\{}()[\]^$+*?.]/g;
+
 // https://developer.mozilla.org/en-US/docs/Web/API/MutationRecord/oldValue
 // Turn the oldValue into a selector to check whether a target would have
 // matched the fromSelector.
-// ex) getStarSelector('display-none-specific', 'body .wrapper .display-none-specific', '\\.') => 'body .wrapper *'
+// ex) getStarSelector('body .wrapper .display-none-specific', 'display-none-specific', '\\.') => 'body .wrapper *'
 // if this matches the mutation.target, then fromSelector was being applied to the target.
 function getStarSelector(
   fromSelector: string,
@@ -238,7 +242,13 @@ function getStarSelector(
     .reduce(
       (prev, current) =>
         prev.replace(
-          new RegExp(`(^|[\\s]+)${prefix}${current}($|[\\s]+)`, "g"),
+          new RegExp(
+            `(^|[\\s]+)${prefix}${current.replace(
+              STRING_ESCAPE_RE,
+              "\\$&"
+            )}($|[\\s]+)`,
+            "g"
+          ),
           " * "
         ),
       fromSelector

@@ -2,7 +2,7 @@
   "manifest_version": 3,
   "name": "Shift Guard",
   "description": "Prevent accidental clicks on recently shifted content by opening a prompt asking whether to continue.",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "icons": {
     "64": "icons/icon-64.png",
     "128": "icons/icon-128.png",

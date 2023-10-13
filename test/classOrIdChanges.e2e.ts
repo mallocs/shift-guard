@@ -214,6 +214,26 @@ describe("Class or id changes can make elements unclickable", () => {
     await expect(browser).toHaveUrl(testPageUrl);
   });
 
+  it("should not create invalid regular expressions when mutations have special characters", async () => {
+    await browser.setWindowSize(1600, 1400);
+    await browser.url(testPageUrl);
+    await expect(browser).toHaveUrl(testPageUrl);
+    const changeEl = await $('div[data-testid="changeEl"');
+    const intervalSpeedEl = await $("#intervalSpeedEl");
+    const changeSelectEl = await $("#changeSelectEl");
+    await intervalSpeedEl.setValue("500");
+    await changeSelectEl.selectByAttribute(
+      "value",
+      "className,visibility-hidden,visibility-hidden visibility-visible-specific .lg:h-[calc(100vh-3rem)]"
+    );
+    await changeEl.waitForDisplayed({
+      timeout: changeTimeout,
+      waitforInterval: 50,
+    });
+    await changeEl.click();
+    await expect(browser).toHaveUrl(testPageUrl);
+  });
+
   it("should have double clicks not be rejected", async () => {
     await browser.setWindowSize(1600, 1400);
     await browser.url(testPageUrl);

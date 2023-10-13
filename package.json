@@ -1,6 +1,6 @@
 {
   "name": "shift-guard",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "Prevent accidental clicks on content that suddenly shifts or appears.",
   "author": "Marcus Ulrich <shiftguard@mallocs.net",
   "license": "ISC",
@@ -9,9 +9,9 @@
   "scripts": {
     "clean": "rimraf dist ./*.zip ./*.crx ./*.pem ./*.xpi",
     "dev": "vite",
-    "build:firefox": "NODE_ENV=production run-s clean compile build:firefox:*",
+    "build:firefox": "NODE_ENV=production run-s compile build:firefox:*",
     "build:firefox:manifest": "cp src/manifest/manifest.firefox.json ./dist/manifest.json",
-    "build:chrome": "NODE_ENV=production run-s clean compile build:chrome:*",
+    "build:chrome": "NODE_ENV=production run-s compile build:chrome:*",
     "build:chrome:manifest": "cp src/manifest/manifest.chrome.json ./dist/manifest.json",
     "bundle": "run-s clean bundle:*",
     "bundle:firefox": "run-s bundle:firefox:*",
