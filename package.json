@@ -1,6 +1,6 @@
 {
   "name": "shift-guard",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "description": "Prevent accidental clicks on content that suddenly shifts or appears.",
   "author": "Marcus Ulrich <shiftguard@mallocs.net",
   "license": "ISC",

@@ -6,11 +6,10 @@ import {
   defaultDelay,
 } from "../lib/shared.js";
 
-// TODO: LayoutShift type
 type LayoutShift = { sources: LayoutShiftAttribution[] };
 type LayoutShiftAttribution = { node: HTMLElement; sources: Node[] };
-let mutationLog: [number, MutationRecord][] = [];
-let shiftLog: [number, LayoutShiftAttribution][] = [];
+let mutationLog: [number, DOMRect][] = [];
+let shiftLog: [number, DOMRect][] = [];
 
 let delay = defaultDelay;
 browser.storage.local.get(appStorageDelayKey).then((res) => {
@@ -65,7 +64,9 @@ const performanceObserver = new PerformanceObserver((list) => {
   list.getEntries().forEach((entry) => {
     entry.entryType === "layout-shift" &&
       (entry as unknown as LayoutShift).sources.forEach((source) => {
-        shiftLog.push([Date.now(), source]);
+        if (source?.node) {
+          shiftLog.push([Date.now(), source.node.getBoundingClientRect()]);
+        }
       });
   });
 });
@@ -107,6 +108,17 @@ function setupClassSets() {
 const VISIBILITY_HIDDEN_RE = /visibility:\s?hidden/g;
 const DISPLAY_NONE_RE = /display:\s?none/g;
 
+function isElementInViewport(el: HTMLElement) {
+  const rect = el.getBoundingClientRect();
+
+  return (
+    rect.bottom >= 0 &&
+    rect.right >= 0 &&
+    rect.top <= window.innerHeight &&
+    rect.left <= window.innerWidth
+  );
+}
+
 const mutationObserver = new MutationObserver((mutationList) => {
   throttledPruneMutationLog();
   for (const mutation of mutationList) {
@@ -120,9 +132,13 @@ const mutationObserver = new MutationObserver((mutationList) => {
     // } else
     if (
       mutation.type === "attributes" &&
+      isElementInViewport(mutation.target as HTMLElement) &&
       shouldLogAttributeMutation(mutation)
     ) {
-      mutationLog.push([Date.now(), mutation]);
+      mutationLog.push([
+        Date.now(),
+        (mutation.target as HTMLElement).getBoundingClientRect(),
+      ]);
     }
   }
 });
@@ -303,23 +319,7 @@ const mousedownHandlerFn = (e: MouseEvent) => {
   pruneMutationLog();
 
   for (const [logTime, logEntry] of mutationLog) {
-    if (logEntry.type === "childList" && logEntry.addedNodes.length) {
-      logEntry.addedNodes.forEach((node) => {
-        if (e.target instanceof HTMLElement && node.contains(e.target)) {
-          stopClick(e);
-          return;
-        }
-      });
-    } else if (
-      logEntry.type === "attributes" &&
-      logEntry.attributeName &&
-      logEntry.target instanceof HTMLElement &&
-      logEntry.oldValue !==
-        logEntry.target.attributes.getNamedItem(logEntry.attributeName)
-          ?.value &&
-      e.target instanceof HTMLElement &&
-      logEntry.target.contains(e.target)
-    ) {
+    if (e.target instanceof HTMLElement && isEventInRect(e, logEntry)) {
       stopClick(e);
       return;
     }
@@ -327,10 +327,7 @@ const mousedownHandlerFn = (e: MouseEvent) => {
 
   pruneShiftLog();
   for (const [logTime, logEntry] of shiftLog) {
-    if (
-      logEntry.node &&
-      isEventInRect(e, logEntry.node.getBoundingClientRect())
-    ) {
+    if (isEventInRect(e, logEntry)) {
       stopClick(e);
       return;
     }
