@@ -1,4 +1,15 @@
+<div align="center">
+
+![Extension logo](./src/public/icons/icon-128.png)
+
 # Shift Guard
+
+[![chrome web store](https://img.shields.io/badge/chrome_web_store-2b4069?style=for-the-badge&logo=googlechrome&logoColor=white)](https://chrome.google.com/webstore/detail/shift-guard/kaoajhabcjalpgigachfhignliolekkb)
+[![firefox add ons](https://img.shields.io/badge/amo-2b4069?style=for-the-badge&logo=firefox&logoColor=white)](https://addons.mozilla.org/en-US/firefox/addon/shift-guard/)
+
+
+</div>
+
 
 Shift Guard is a browser extension that helps prevent accidentally clicking the wrong thing when parts of a website suddenly shift or appear.
 
